@@ -24,7 +24,7 @@ public class Main extends Application {
         // Find the text input element by its name
         WebElement element = driver.findElement(By.name("q"));
         // Enter something to search for
-        element.sendKeys("Spiralinks"); //Test
+        element.sendKeys("Spiralinks");
         // Now submit the form. WebDriver will find the form for us from the element
         element.submit();
         // Google's search is rendered dynamically with JavaScript.

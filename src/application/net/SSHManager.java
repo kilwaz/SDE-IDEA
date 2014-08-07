@@ -323,8 +323,12 @@ public class SSHManager {
         }
     }
 
+    //[localhost]:13391 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA4w7Q1rYoKgYLdZszfRLI2+aJ3Xrf6a1qn5v12mfPnfJyFMkmdlwsMSvs6HR4goUecoOGd+75I/YVvJUoKOmUF2p/tKvj/5L11p+uzc0Ntx+BzL1fgznUzV7QlPCbQv96vuZnityqtgIahVBAz1oZT8yeAdXNU8Gr6mJYMT9ByI5kTdNfeyXaZB+edKeoo7FAmdIN2oOBX1uLhasJUMky4na/lmU8m2xFsdSwfobsKG5c4iClEYezpRkR+/shOGt/1lcbfhSh5jpxfNB19Tyc440GSAH38rDqrjslAAJKR9jNIfrkqJtqv53juYMRopp8JPQ2h8To5hafSmX2Ee0tCw==
+
     public void createShellChannel() {
         try {
+
+
             Channel channel = sesConnection.openChannel("shell");
 
             pip = new PipedInputStream(40);

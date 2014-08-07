@@ -39,11 +39,16 @@ public class CompileCode {
                     "   }" +
                     "}";
 
-            File dir = new File("C:\\developers\\alex\\svnwork\\focal-v6-demo-test\\SDE\\out\\production\\SDE\\programs");
-            for (File file : dir.listFiles()) file.delete();
+            String userHome = System.getProperty("user.home");
+
+            //File dir = new File("C:\\developers\\alex\\svnwork\\focal-v6-demo-test\\SDE\\out\\production\\SDE\\programs");
+            File dir = new File(userHome, "/SDE/programs");
+            if (dir.exists()) {
+                for (File file : dir.listFiles()) file.delete();
+            }
 
             // Save source in .java file.
-            File root = new File("C:\\developers\\alex\\svnwork\\focal-v6-demo-test\\SDE\\out\\production\\SDE"); // On Windows running on C:\, this is C:\java.
+            File root = new File(userHome, "/SDE"); // On Windows running on C:\, this is C:\java.
             //File root = new File("C:\\developers\\alex\\svnwork\\focal-v6-demo-test\\SDE\\out\\production\\SDE\\programs"); // On Windows running on C:\, this is C:\java.
             File sourceFile = new File(root, "programs/" + className + ".java");
             sourceFile.getParentFile().mkdirs();

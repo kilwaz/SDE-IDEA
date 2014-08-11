@@ -40,6 +40,9 @@ public class CompileCode {
                     "   private SSHManager ssh(String connectionIP, String username, String password) {" +
                     "      return SDEUtils.openSSHSession(connectionIP, username, password);" +
                     "   }" +
+                    "   private void screenshot() {" +
+                    "      SDEUtils.takeScreenShot();" +
+                    "   }" +
                     "}";
 
             String userHome = System.getProperty("user.home");

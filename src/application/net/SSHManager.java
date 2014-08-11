@@ -342,13 +342,13 @@ public class SSHManager {
             Thread t = new Thread(new Runnable() {
                 public void run() {
                     Controller controller = Controller.getInstance();
-                    byte[] data = new byte[1024];
+                    byte[] data = new byte[4096];
                     try {
-                        int i = sink.read(data, 0, 1024);
+                        int i = sink.read(data, 0, 4096);
                         while (true) {
                             if (i < 0) break;
                             controller.writeToConsole(new String(data, 0, i));
-                            i = sink.read(data, 0, 1024);
+                            i = sink.read(data, 0, 4096);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

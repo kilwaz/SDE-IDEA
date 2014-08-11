@@ -274,10 +274,11 @@ public class Controller implements Initializable {
             @Override
             public void handle(KeyEvent ke) {
                 if (ke.getCode().equals(KeyCode.ENTER)) {
-                    String selectedText = console.getSelectedText();
-                    System.out.println("Pressed enter -> " + selectedText);
+                    String consoleText = console.getText();
+                    String commandText = consoleText.substring(consoleText.lastIndexOf("$") + 1, consoleText.length());
+                    System.out.println("Sending -> " + commandText);
                     SSHManager sshManager = (SSHManager) DataBank.loadVariable("ssh", "s1");
-                    sshManager.sendShellCommand(selectedText);
+                    sshManager.sendShellCommand(commandText);
                 }
             }
         });

@@ -1,5 +1,9 @@
 package application;
 
+import application.utils.CompileCode;
+import application.utils.DataBank;
+import application.utils.ThreadManager;
+
 public class Source {
     private Boolean compiled = false;
     private String source;
@@ -69,7 +73,9 @@ public class Source {
             compile();
         }
         if (this.compiled) {
-            new Thread((Runnable) compiledInstance).start();
+            Thread t = new Thread((Runnable) compiledInstance);
+            t.start();
+            ThreadManager.getInstance().addThread(t);
         }
     }
 }

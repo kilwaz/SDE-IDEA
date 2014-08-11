@@ -1,4 +1,4 @@
-package application;
+package application.utils;
 
 import application.net.SSHManager;
 import com.jcraft.jsch.JSch;
@@ -44,7 +44,7 @@ public class SDEUtils {
         String userName = "spiralinks";
         String password = "C0deFreeze09";
         String connectionIP = "172.16.10.212";
-        SSHManager instance = new SSHManager(userName, password, connectionIP, knownHosts);
+        SSHManager instance = new SSHManager(userName, password, connectionIP, knownHosts, 22);
         String errorMessage = instance.connect();
 
         if (errorMessage != null) {
@@ -64,7 +64,7 @@ public class SDEUtils {
         String userName = "spiralinks";
         String password = "C0deFreeze09";
         String connectionIP = "172.16.10.212";
-        SSHManager instance = new SSHManager(userName, password, connectionIP, knownHosts);
+        SSHManager instance = new SSHManager(userName, password, connectionIP, knownHosts, 22);
         String errorMessage = instance.connect();
 
         if (errorMessage != null) {

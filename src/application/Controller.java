@@ -1,6 +1,7 @@
 package application;
 
 import application.net.SSHManager;
+import application.utils.DataBank;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;

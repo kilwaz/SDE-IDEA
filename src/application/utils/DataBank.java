@@ -1,4 +1,8 @@
-package application;
+package application.utils;
+
+import application.FlowNode;
+import application.MySQLConnection;
+import application.Program;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

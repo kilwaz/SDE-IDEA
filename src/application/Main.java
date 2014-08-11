@@ -1,16 +1,15 @@
 package application;
 
+import application.utils.ConnectionManager;
+import application.utils.DataBank;
+import application.utils.ThreadManager;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import javafx.stage.WindowEvent;
 
 public class Main extends Application {
 
@@ -18,7 +17,8 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         new MySQLConnection();
         DataBank.loadFromDatabase();
-
+        new ConnectionManager();
+        new ThreadManager();
 //        WebDriver driver = new FirefoxDriver();
 //        driver.get("http://www.google.com");
 //        // Find the text input element by its name
@@ -46,6 +46,12 @@ public class Main extends Application {
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Spiralinks Development Engine V0.1");
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            public void handle(WindowEvent we) {
+                ConnectionManager.getInstance().closeConnections();
+                ThreadManager.getInstance().closeThreads();
+            }
+        });
         primaryStage.show();
     }
 

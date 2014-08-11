@@ -1,4 +1,7 @@
-package application;
+package application.utils;
+
+import application.FlowController;
+import application.Source;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -18,8 +21,8 @@ public class CompileCode {
             // Prepare source somehow.
             String referenceID = FlowController.getFlowControllerFromSource(source).getReferenceID();
             String sourceString = "package programs;" +
-                    "import application.SDEUtils;" +
-                    "import application.DataBank;" +
+                    "import application.utils.SDEUtils;" +
+                    "import application.utils.DataBank;" +
                     "import application.Program;" +
                     "import application.net.SSHManager;" +
                     "public class " + className + " implements Runnable {" +

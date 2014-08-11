@@ -1,5 +1,6 @@
 package application;
 
+import application.utils.DataBank;
 import javafx.embed.swing.SwingNode;
 import org.fife.ui.rsyntaxtextarea.CodeTemplateManager;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;

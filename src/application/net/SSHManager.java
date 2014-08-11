@@ -1,6 +1,8 @@
 package application.net;
 
 import application.Controller;
+import application.utils.ConnectionManager;
+import application.utils.ThreadManager;
 import com.jcraft.jsch.*;
 
 import java.io.*;
@@ -35,24 +37,13 @@ public class SSHManager {
         strConnectionIP = connectionIP;
     }
 
-    public SSHManager(String userName, String password, String connectionIP, String knownHostsFileName) {
-        doCommonConstructorActions(userName, password, connectionIP, knownHostsFileName);
-        intConnectionPort = 22;
-        intTimeOut = 60000;
-    }
-
     public SSHManager(String userName, String password, String connectionIP,
                       String knownHostsFileName, int connectionPort) {
         doCommonConstructorActions(userName, password, connectionIP,
                 knownHostsFileName);
         intConnectionPort = connectionPort;
         intTimeOut = 60000;
-    }
-
-    public SSHManager(String userName, String password, String connectionIP, String knownHostsFileName, int connectionPort, int timeOutMilliseconds) {
-        doCommonConstructorActions(userName, password, connectionIP, knownHostsFileName);
-        intConnectionPort = connectionPort;
-        intTimeOut = timeOutMilliseconds;
+        ConnectionManager.getInstance().addConnection(this);
     }
 
     public String connect() {
@@ -118,6 +109,31 @@ public class SSHManager {
 
     public void close() {
         sesConnection.disconnect();
+        try {
+            if (sink != null) {
+                sink.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (pip != null) {
+                pip.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (pop != null) {
+                pop.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (print != null) {
+            print.close();
+        }
     }
 
     static int checkAck(InputStream in) throws IOException {
@@ -327,8 +343,6 @@ public class SSHManager {
 
     public void createShellChannel() {
         try {
-
-
             Channel channel = sesConnection.openChannel("shell");
 
             pip = new PipedInputStream(40);
@@ -356,6 +370,7 @@ public class SSHManager {
                 }
             });
             t.start();
+            ThreadManager.getInstance().addThread(t);
 
             channel.setInputStream(pip);
             channel.setOutputStream(source);

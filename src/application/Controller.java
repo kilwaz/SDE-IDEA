@@ -2,6 +2,7 @@ package application;
 
 import application.net.SSHManager;
 import application.utils.DataBank;
+import application.utils.SourceEditer;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -283,6 +284,27 @@ public class Controller implements Initializable {
                 }
             }
         });
+
+        Tab tab = new Tab();
+        tab.setText("Source Test");
+
+        AnchorPane tabAnchorPane = new AnchorPane();
+
+        SourceEditer sourceEditer = new SourceEditer(600, 400);
+        tabAnchorPane.getChildren().add(sourceEditer);
+        sourceEditer.draw();
+
+//        Text text1 = new Text("Big italic red text");
+//        text1.setFill(Color.RED);
+//        text1.setFont(Font.font("Consolas", FontPosture.REGULAR, 12));
+//        Text text2 = new Text(" little bold blue text");
+//        text2.setFill(Color.BLUE);
+//        text2.setFont(Font.font("Consolas", FontPosture.REGULAR, 12));
+//        TextFlow textFlow = new TextFlow(text1, text2);
+
+
+        tab.setContent(sourceEditer);
+        tabPaneSource.getTabs().add(tab);
     }
 
     public void createOrShowSourceTab(FlowNode flowNode) {

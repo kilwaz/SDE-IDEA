@@ -2,14 +2,16 @@ package application.utils;
 
 import application.FlowController;
 import application.Source;
+import org.controlsfx.dialog.Dialogs;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.Charset;
 
 public class CompileCode {
     static int counter = 0;
@@ -38,9 +40,6 @@ public class CompileCode {
                     "   private void run(String name) {" +
                     "      Program.runHelper(name, this.referenceID);" +
                     "   }" +
-                    "   private SSHManager ssh(String connectionIP, String username, String password) {" +
-                    "      return SDEUtils.openSSHSession(connectionIP, username, password);" +
-                    "   }" +
                     "}";
 
             String userHome = System.getProperty("user.home");
@@ -58,25 +57,49 @@ public class CompileCode {
             sourceFile.getParentFile().mkdirs();
 
             new FileWriter(sourceFile).append(sourceString).close();
-
             // Compile source file.
             JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-            compiler.run(null, null, null, sourceFile.getPath());
 
-            // Load and instantiate compiled class.
-            URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{root.toURI().toURL()});
-            Class<?> cls = Class.forName("programs." + className, true, classLoader);
-            instance = cls.newInstance();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ByteArrayOutputStream err = new ByteArrayOutputStream();
 
-            System.out.println("Compiled " + instance);
-        } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (InstantiationException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            compiler.run(null, out, err, sourceFile.getPath());
+
+            String outString = new String(out.toByteArray(), Charset.defaultCharset());
+            String errString = new String(err.toByteArray(), Charset.defaultCharset());
+
+            if (errString.length() > 1) {
+                String lineNumber = errString.substring(errString.indexOf(className) + className.length() + 6);
+                lineNumber = lineNumber.substring(0, lineNumber.indexOf(":"));
+                Dialogs.create()
+                        .owner(null)
+                        .title("Compile error on " + source.getParentFlowNode().getContainedText())
+                        .masthead("Error at line " + lineNumber)
+                        .message(errString)
+                        .showError();
+            } else {
+                // Load and instantiate compiled class.
+                URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{root.toURI().toURL()});
+                Class<?> cls = Class.forName("programs." + className, true, classLoader);
+                instance = cls.newInstance();
+
+                System.out.println("Compiled " + instance);
+            }
+            if (outString.length() > 1) {
+                Dialogs.create()
+                        .owner(null)
+                        .title("ERR")
+                        .masthead(null)
+                        .message(outString)
+                        .showError();
+            }
+        } catch (Exception ex) {
+            Dialogs.create()
+                    .owner(null)
+                    .title("You do want dialogs right?")
+                    .masthead(null)
+                    .message("I was a bit worried that you might not want them, so I wanted to double check.")
+                    .showException(ex);
         }
         counter++;
         return instance;

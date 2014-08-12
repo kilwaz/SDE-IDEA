@@ -3,9 +3,6 @@ package application.utils;
 import application.net.SSHManager;
 import com.jcraft.jsch.JSch;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -75,18 +72,5 @@ public class SDEUtils {
         }
 
         instance.scpTo("/opt/jboss/jboss-4.2.2.GA/server/spl-8080/deploy/focal-v3-rbs2010.ear", "C:\\jboss-4.2.1.GA\\server\\default\\deploy\\focal-v3-rbs2010.ear");
-    }
-
-    public static void takeScreenShot() {
-        BufferedImage image = null;
-        try {
-            String userHome = System.getProperty("user.home");
-            image = new Robot().createScreenCapture(new Rectangle(Toolkit.getDefaultToolkit().getScreenSize()));
-            ImageIO.write(image, "png", new File(userHome, "/SDE/screenshot.png"));
-        } catch (AWTException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

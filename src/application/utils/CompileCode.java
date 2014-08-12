@@ -23,6 +23,7 @@ public class CompileCode {
             String sourceString = "package programs;" +
                     "import application.utils.SDEUtils;" +
                     "import application.utils.DataBank;" +
+                    "import application.utils.ScreenShot;" +
                     "import application.Program;" +
                     "import application.net.SSHManager;" +
                     "public class " + className + " implements Runnable {" +
@@ -39,9 +40,6 @@ public class CompileCode {
                     "   }" +
                     "   private SSHManager ssh(String connectionIP, String username, String password) {" +
                     "      return SDEUtils.openSSHSession(connectionIP, username, password);" +
-                    "   }" +
-                    "   private void screenshot() {" +
-                    "      SDEUtils.takeScreenShot();" +
                     "   }" +
                     "}";
 

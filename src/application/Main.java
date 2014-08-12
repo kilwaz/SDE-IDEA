@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 public class Main extends Application {
+    private static Stage primaryStage;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -53,6 +54,12 @@ public class Main extends Application {
             }
         });
         primaryStage.show();
+
+        this.primaryStage = primaryStage;
+    }
+
+    public static Stage getStage() {
+        return primaryStage;
     }
 
     public static void main(String[] args) {

@@ -23,7 +23,7 @@ public class CompileCode {
             String sourceString = "package programs;" +
                     "import application.utils.SDEUtils;" +
                     "import application.utils.DataBank;" +
-                    "import application.utils.ScreenShot;" +
+                    "import application.utils.ScreenShotClass;" +
                     "import application.Program;" +
                     "import application.net.SSHManager;" +
                     "public class " + className + " implements Runnable {" +

@@ -10,6 +10,7 @@ public class ScreenShotClass {
     public static final int ALL_SCREENS = 0;
     public static final int PRIMARY_SCREEN = 1;
     public static final int APPLICATION_SCREEN = 2;
+    public static final int BROWSER_SCREEN = 3;
 
     public static void takeScreenShot(String name) {
         takeScreenShot(PRIMARY_SCREEN, name);
@@ -38,6 +39,9 @@ public class ScreenShotClass {
                     screenRectangle = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
                     break;
                 case 2: // Application Screen
+                    screenRectangle = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+                    break;
+                case 3: // Browser Screen
                     screenRectangle = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
                     break;
                 default: // Default is Primary Screen

@@ -23,9 +23,8 @@ public class CompileCode {
             // Prepare source somehow.
             String referenceID = FlowController.getFlowControllerFromSource(source).getReferenceID();
             String sourceString = "package programs;" +
-                    "import application.utils.SDEUtils;" +
-                    "import application.utils.DataBank;" +
-                    "import application.utils.ScreenShotClass;" +
+                    "import application.utils.*;" +
+                    "import org.openqa.selenium.*;" +
                     "import application.Program;" +
                     "import application.net.SSHManager;" +
                     "public class " + className + " implements Runnable {" +

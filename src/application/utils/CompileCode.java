@@ -19,9 +19,10 @@ public class CompileCode {
     public static Object compileCode(Source source) {
         Object instance = null;
         String className = "SDEClass" + source.getId() + "C" + counter;
+        String referenceID = "[Unloaded Reference]";
         try {
             // Prepare source somehow.
-            String referenceID = FlowController.getFlowControllerFromSource(source).getReferenceID();
+            referenceID = FlowController.getFlowControllerFromSource(source).getReferenceID();
             String sourceString = "package programs;" +
                     "import application.utils.*;" +
                     "import org.openqa.selenium.*;" +
@@ -95,9 +96,9 @@ public class CompileCode {
         } catch (Exception ex) {
             Dialogs.create()
                     .owner(null)
-                    .title("You do want dialogs right?")
+                    .title("Compile Error")
                     .masthead(null)
-                    .message("I was a bit worried that you might not want them, so I wanted to double check.")
+                    .message("Exception encountered while trying to compile " + referenceID)
                     .showException(ex);
         }
         counter++;

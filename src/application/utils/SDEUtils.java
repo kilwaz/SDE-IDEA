@@ -5,6 +5,7 @@ import com.jcraft.jsch.JSch;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class SDEUtils {
     static {
@@ -57,6 +58,28 @@ public class SDEUtils {
         find = find.replace("/", "\\/");
         replace = replace.replace("/", "\\/");
         // sed with in place replacement (does not create new file, this is the -i flag)
-        sshManager.sendCommand("sed -i 's/" + find + "/" + replace + "/' " + fileLocation);
+        sshManager.sendShellCommand("sed -i 's/" + find + "/" + replace + "/' " + fileLocation);
+    }
+
+    public static void runCMDCommand(String command) {
+        try {
+            // Execute command
+            Process child = Runtime.getRuntime().exec("cmd /C " + command);
+
+            //System.out.println("Command is " + command);
+
+            InputStream is = child.getInputStream();
+            InputStream errSt = child.getErrorStream();
+            int in = -1;
+
+            while ((in = is.read()) != -1) {
+                System.out.print(((char) in));
+            }
+            while ((in = errSt.read()) != -1) {
+                System.out.print(((char) in));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

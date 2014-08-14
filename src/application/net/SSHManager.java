@@ -80,7 +80,7 @@ public class SSHManager {
         return warnMessage;
     }
 
-    public String sendCommand(String command) {
+    private String sendCommand(String command) {
         StringBuilder outputBuffer = new StringBuilder();
 
         try {

@@ -294,17 +294,9 @@ public class Controller implements Initializable {
         tabAnchorPane.getChildren().add(sourceEditer);
         sourceEditer.draw();
 
-//        Text text1 = new Text("Big italic red text");
-//        text1.setFill(Color.RED);
-//        text1.setFont(Font.font("Consolas", FontPosture.REGULAR, 12));
-//        Text text2 = new Text(" little bold blue text");
-//        text2.setFill(Color.BLUE);
-//        text2.setFont(Font.font("Consolas", FontPosture.REGULAR, 12));
-//        TextFlow textFlow = new TextFlow(text1, text2);
-
-
         tab.setContent(sourceEditer);
         tabPaneSource.getTabs().add(tab);
+        tabPaneSource.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
     }
 
     public void createOrShowSourceTab(FlowNode flowNode) {

@@ -15,7 +15,7 @@ public class MySQLConnection {
         id INT NOT NULL AUTO_INCREMENT,
         program_id INT,
         contained_text VARCHAR(100),
-        source VARCHAR(2000),
+        source VARCHAR(4000),
         referenceID VARCHAR(100),
         PRIMARY KEY (id));
 

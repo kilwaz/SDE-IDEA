@@ -38,27 +38,6 @@ public class SDEUtils {
         return instance;
     }
 
-    public static void sshCommand(String command) {
-        System.out.println("sendCommand");
-        //JSch.setConfig("StrictHostKeyChecking", "yes");
-        String userName = "spiralinks";
-        String password = "C0deFreeze09";
-        String connectionIP = "172.16.10.212";
-        SSHManager instance = new SSHManager(userName, password, connectionIP, knownHosts, 22);
-        String errorMessage = instance.connect();
-
-        if (errorMessage != null) {
-            System.out.println("ERROR " + errorMessage);
-        }
-
-        String result = instance.sendCommand(command);
-        //instance.scpFrom("/home/spiralinks/test.txt", "C:\\Users\\alex\\Desktop\\Meetup\\test.txt");
-        // close only after all commands are sent
-
-        instance.close();
-        System.out.println("Done " + result);
-    }
-
     public static void scpTo() {
         System.out.println("SCP");
         String userName = "spiralinks";
@@ -72,5 +51,12 @@ public class SDEUtils {
         }
 
         instance.scpTo("/opt/jboss/jboss-4.2.2.GA/server/spl-8080/deploy/focal-v3-rbs2010.ear", "C:\\jboss-4.2.1.GA\\server\\default\\deploy\\focal-v3-rbs2010.ear");
+    }
+
+    public static void editFileReplaceText(SSHManager sshManager, String find, String replace, String fileLocation) {
+        find = find.replace("/", "\\/");
+        replace = replace.replace("/", "\\/");
+        // sed with in place replacement (does not create new file, this is the -i flag)
+        sshManager.sendCommand("sed -i 's/" + find + "/" + replace + "/' " + fileLocation);
     }
 }

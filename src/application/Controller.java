@@ -32,7 +32,7 @@ public class Controller implements Initializable {
     private StackPane stackPane;
 
     @FXML
-    private ListView<String> programList;
+    private ListView<Program> programList;
 
     @FXML
     private AnchorPane programAccordion;
@@ -203,13 +203,13 @@ public class Controller implements Initializable {
             }
         });
 
-        programList.getItems().addAll(DataBank.getProgramNames());
+        programList.getItems().addAll(DataBank.getPrograms());
         programList.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
             private String clickedName = "";
 
             @Override
             public void handle(ContextMenuEvent event) {
-                clickedName = programList.getSelectionModel().getSelectedItem();
+                clickedName = programList.getSelectionModel().getSelectedItem().getProgramName();
 
                 MenuItem menuItemNewProgram = new MenuItem("New Program");
                 menuItemNewProgram.setOnAction(new EventHandler<ActionEvent>() {
@@ -217,7 +217,7 @@ public class Controller implements Initializable {
                     public void handle(ActionEvent event) {
                         Program program = DataBank.createNewProgram("New program");
 
-                        programList.getItems().add(program.getProgramName());
+                        programList.getItems().add(program);
                     }
                 });
 
@@ -260,15 +260,11 @@ public class Controller implements Initializable {
         });
 
         programList.getSelectionModel().selectedItemProperty().addListener(
-                new ChangeListener<String>() {
-                    public void changed(ObservableValue<? extends String> ov, String oldValue, String newValue) {
-                        Program program = DataBank.getProgramByName(newValue);
+                new ChangeListener<Program>() {
 
-                        if (newValue != null) {
-                            // Removes listener while swapping over text
-                            DataBank.currentlyEditProgram = program;
-                            canvasController.drawProgram(program);
-                        }
+                    public void changed(ObservableValue<? extends Program> ov, Program oldProgram, Program newProgram) {
+                        DataBank.currentlyEditProgram = newProgram;
+                        canvasController.drawProgram(newProgram);
                     }
                 });
 

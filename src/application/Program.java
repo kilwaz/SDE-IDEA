@@ -9,13 +9,13 @@ public class Program {
 
     public Program(String programName) {
         this.programName = programName;
-        flowController = new FlowController();
+        flowController = new FlowController(this);
     }
 
     public Program(String programName, Integer id) {
         this.programName = programName;
         this.id = id;
-        flowController = new FlowController();
+        flowController = new FlowController(this);
     }
 
     public String getProgramName() {
@@ -24,6 +24,10 @@ public class Program {
 
     public void setProgramName(String programName) {
         this.programName = programName;
+    }
+
+    public int getId() {
+        return this.id;
     }
 
     public FlowController getFlowController() {
@@ -46,5 +50,9 @@ public class Program {
     public static void runHelper(String name, String referenceID) {
         Source source = (Source) DataBank.loadInstanceObject(referenceID, name);
         source.run();
+    }
+
+    public String toString() {
+        return "" + this.programName;
     }
 }

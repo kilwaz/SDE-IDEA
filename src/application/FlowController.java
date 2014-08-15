@@ -8,14 +8,12 @@ import java.util.List;
 public class FlowController {
     private FlowNode startNode;
     private String referenceID = "test";
+    private Program parentProgram;
 
-    public FlowController() {
+    public FlowController(Program parentProgram) {
+        this.parentProgram = parentProgram;
         startNode = new FlowNode(30.0, 30.0, "Start");
         startNode.setId(-1);
-//        FlowNode node = new FlowNode(100.0, 120.0, "One");
-//        startNode.addChild(node);
-//        startNode.addChild(new FlowNode(100.0, 30.0, "Two"));
-//        node.addChild(new FlowNode(200.0, 120.0, "Three"));
     }
 
     public void createNewNode(Integer id, String containedText, String source, String referenceID, Boolean isStartNode) {
@@ -44,6 +42,10 @@ public class FlowController {
 
     public void loadInstances() {
         loadInstances(startNode, referenceID);
+    }
+
+    public Program getParentProgram() {
+        return this.parentProgram;
     }
 
     public void loadInstances(FlowNode flowNode, String referenceID) {

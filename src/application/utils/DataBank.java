@@ -1,5 +1,6 @@
 package application.utils;
 
+import application.FlowController;
 import application.FlowNode;
 import application.MySQLConnection;
 import application.Program;
@@ -13,7 +14,7 @@ import java.util.List;
 
 public class DataBank {
     static public Program currentlyEditProgram;
-    static private HashMap<String, Program> programs = new HashMap<String, Program>();
+    static private HashMap<Integer, Program> programs = new HashMap<Integer, Program>();
     static private HashMap<String, HashMap<String, Object>> programVariables = new HashMap<String, HashMap<String, Object>>();
     static private HashMap<String, HashMap<String, Object>> programInstances = new HashMap<String, HashMap<String, Object>>();
     static private MySQLConnection mySQLInstance;
@@ -28,18 +29,18 @@ public class DataBank {
         return nameList;
     }
 
-    static public void renameProgram(Program program, String name) {
-        programs.remove(program.getProgramName());
-        program.setProgramName(name);
-        programs.put(name, program);
-    }
+//    static public void renameProgram(Program program, String name) {
+//        programs.remove(program.getProgramName());
+//        program.setProgramName(name);
+//        programs.put(name, program);
+//    }
 
-    static public Program getProgramByName(String name) {
-        return programs.get(name);
+    public static Program getProgramById(Integer id) {
+        return programs.get(id);
     }
 
     private static void addProgram(Program program) {
-        programs.put(program.getProgramName(), program);
+        programs.put(program.getId(), program);
     }
 
     static public List<Program> getPrograms() {
@@ -121,8 +122,24 @@ public class DataBank {
                 preparedStatement.setString(1, node.getContainedText());
                 preparedStatement.setString(2, node.getSource().getSource());
                 preparedStatement.setInt(3, node.getId());
-                preparedStatement.executeUpdate();
+                int result = preparedStatement.executeUpdate();
                 preparedStatement.close();
+
+                if (result == 0) { // If record does not exist insert a new one..
+                    Integer nextID = getNextId("node");  // Gets the next ID for node that is about to be created
+
+                    preparedStatement = mySQLInstance.getPreparedStatement("insert into node values (default, ?, ?, ?, ?)");
+                    if (preparedStatement != null) {
+                        preparedStatement.setInt(1, FlowController.getFlowControllerFromSource(node.getSource()).getParentProgram().getId());
+                        preparedStatement.setString(2, node.getContainedText());
+                        preparedStatement.setString(3, node.getSource().getSource());
+                        preparedStatement.setInt(4, node.getId());
+                        preparedStatement.executeUpdate();
+                        preparedStatement.close();
+                    }
+
+                    node.setId(nextID);
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -140,14 +157,14 @@ public class DataBank {
                 String name = resultSet.getString("name");
                 Integer programId = resultSet.getInt("id");
                 Program loadedProgram = new Program(name, programId);
-                ResultSet sourceResultSet = mySQLInstance.runQuery("select id,source,contained_text,referenceID from node where program_id = '" + programId + "';");
+                ResultSet sourceResultSet = mySQLInstance.runQuery("select id,source,contained_text,reference_id from node where program_id = '" + programId + "';");
 
                 while (sourceResultSet.next()) {
                     loadedProgram.getFlowController().createNewNode(
                             sourceResultSet.getInt("id"),
                             sourceResultSet.getString("contained_text"),
                             sourceResultSet.getString("source"),
-                            sourceResultSet.getString("referenceID"),
+                            sourceResultSet.getString("reference_id"),
                             true);
                 }
 
@@ -157,5 +174,23 @@ public class DataBank {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private static Integer getNextId(String tableName) {
+        Integer autoIncrement = -1;
+        try {
+            if (mySQLInstance == null) {
+                mySQLInstance = MySQLConnection.getInstance();
+            }
+
+            ResultSet resultSet = mySQLInstance.runQuery("SELECT AUTO_INCREMENT FROM information_schema.tables WHERE table_name = '" + tableName + "' AND table_schema = DATABASE();");
+            while (resultSet.next()) {
+                autoIncrement = resultSet.getInt("AUTO_INCREMENT");
+            }
+            resultSet.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return autoIncrement;
     }
 }

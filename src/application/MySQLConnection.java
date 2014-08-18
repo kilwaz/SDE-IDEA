@@ -17,6 +17,8 @@ public class MySQLConnection {
         contained_text VARCHAR(100),
         source VARCHAR(4000),
         reference_id VARCHAR(100),
+        source_x DOUBLE,
+        source_y DOUBLE,
         PRIMARY KEY (id));
 
     create table connection (
@@ -25,7 +27,7 @@ public class MySQLConnection {
         node_end INT,
         PRIMARY KEY (id));
 
-        insert into node values (default, 1,'YAY', 'hello','s1');
+        insert into node values (default, 1,'YAY', 'hello','s1',10,10);
     */
 
     public MySQLConnection() {

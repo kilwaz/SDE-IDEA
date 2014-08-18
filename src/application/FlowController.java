@@ -17,8 +17,8 @@ public class FlowController {
         startNode.setId(-1);
     }
 
-    public void createNewNode(Integer id, Integer programId, String containedText, String source, String referenceID, Boolean isStartNode) {
-        FlowNode newNode = new FlowNode(30.0, 30.0, containedText, source, id, programId);
+    public void createNewNode(Integer id, Integer programId, String containedText, String source, String referenceID, Double sourceX, Double sourceY, Boolean isStartNode) {
+        FlowNode newNode = new FlowNode(sourceX, sourceY, containedText, source, id, programId);
         sources.add(newNode);
         if (isStartNode) {
             startNode = newNode;

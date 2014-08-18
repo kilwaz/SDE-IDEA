@@ -61,6 +61,7 @@ public class CanvasController {
 
     public Boolean canvasMouseUp(MouseEvent event) {
         if (isDraggingNode) {
+            DataBank.saveNode(draggedNode);
             draggedNode = null;
             isDraggingNode = false;
             drawProgram(DataBank.currentlyEditProgram);

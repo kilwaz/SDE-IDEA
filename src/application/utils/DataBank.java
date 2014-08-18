@@ -116,23 +116,27 @@ public class DataBank {
                 mySQLInstance = MySQLConnection.getInstance();
             }
 
-            PreparedStatement preparedStatement = mySQLInstance.getPreparedStatement("update node set contained_text = ?, source = ? where id = ?");
+            PreparedStatement preparedStatement = mySQLInstance.getPreparedStatement("update node set contained_text = ?, source = ?, source_x = ?, source_y = ? where id = ?");
             if (preparedStatement != null) {
                 preparedStatement.setString(1, node.getContainedText());
                 preparedStatement.setString(2, node.getSource().getSource());
-                preparedStatement.setInt(3, node.getId());
+                preparedStatement.setDouble(3, node.getX());
+                preparedStatement.setDouble(4, node.getY());
+                preparedStatement.setInt(5, node.getId());
                 int result = preparedStatement.executeUpdate();
                 preparedStatement.close();
 
                 if (result == 0) { // If record does not exist insert a new one..
                     node.setId(getNextId("node")); // Gets the next ID for a node that is about to be created
 
-                    preparedStatement = mySQLInstance.getPreparedStatement("insert into node values (default, ?, ?, ?, ?)");
+                    preparedStatement = mySQLInstance.getPreparedStatement("insert into node values (default, ?, ?, ?, ?, ?, ?)");
                     if (preparedStatement != null) {
                         preparedStatement.setInt(1, node.getProgramId());
                         preparedStatement.setString(2, node.getContainedText());
                         preparedStatement.setString(3, node.getSource().getSource());
                         preparedStatement.setInt(4, node.getId());
+                        preparedStatement.setDouble(5, node.getX());
+                        preparedStatement.setDouble(6, node.getY());
                         preparedStatement.executeUpdate();
                         preparedStatement.close();
                     }
@@ -154,7 +158,7 @@ public class DataBank {
                 String name = resultSet.getString("name");
                 Integer programId = resultSet.getInt("id");
                 Program loadedProgram = new Program(name, programId);
-                ResultSet sourceResultSet = mySQLInstance.runQuery("select id,program_id,source,contained_text,reference_id from node where program_id = '" + programId + "';");
+                ResultSet sourceResultSet = mySQLInstance.runQuery("select id,program_id,source,contained_text,reference_id,source_x,source_y from node where program_id = '" + programId + "';");
 
                 while (sourceResultSet.next()) {
                     loadedProgram.getFlowController().createNewNode(
@@ -163,6 +167,8 @@ public class DataBank {
                             sourceResultSet.getString("contained_text"),
                             sourceResultSet.getString("source"),
                             sourceResultSet.getString("reference_id"),
+                            sourceResultSet.getDouble("source_x"),
+                            sourceResultSet.getDouble("source_y"),
                             true);
                 }
 

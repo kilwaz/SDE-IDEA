@@ -156,6 +156,17 @@ public class Controller implements Initializable {
                     });
                     menuItemFlowAddNode.setId("AddNode-" + flowNode.getId());
 
+                    MenuItem menuItemFlowStartNode = new MenuItem("Set Start Node");
+                    menuItemFlowAddNode.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent event) {
+                            Program program = DataBank.currentlyEditProgram;
+                            FlowNode flowNode = program.getFlowController().getNodeById(Integer.parseInt(((MenuItem) event.getSource()).getId().replace("StartNode-", "")));
+                            program.getFlowController().setStartNode(flowNode);
+                        }
+                    });
+                    menuItemFlowStartNode.setId("StartNode-" + flowNode.getId());
+
                     MenuItem menuItemFlowRemoveNode = new MenuItem("Remove Node");
                     menuItemFlowRemoveNode.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
@@ -190,6 +201,7 @@ public class Controller implements Initializable {
                     ContextMenu contextMenu = new ContextMenu();
                     contextMenu.getItems().add(menuItemFlowAddNode);
                     contextMenu.getItems().add(menuItemFlowRemoveNode);
+                    contextMenu.getItems().add(menuItemFlowStartNode);
                     contextMenu.show(canvasFlow, event.getScreenX(), event.getScreenY());
                 }
             }

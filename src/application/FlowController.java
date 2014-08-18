@@ -40,6 +40,10 @@ public class FlowController {
         return startNode;
     }
 
+    public void setStartNode(FlowNode startNode) {
+        this.startNode = startNode;
+    }
+
     public String getReferenceID() {
         return this.referenceID;
     }
@@ -49,34 +53,21 @@ public class FlowController {
     }
 
     public Boolean compile() {
-        return compile(startNode);
+        for (FlowNode node : sources) {
+            node.getSource().compile();
+        }
+
+        return true; // This should return what the actual compile method returns..
     }
 
     public void loadInstances() {
-        loadInstances(startNode, referenceID);
+        for (FlowNode node : sources) {
+            DataBank.saveInstanceObject(referenceID, node.getContainedText(), node.getSource());
+        }
     }
 
     public Program getParentProgram() {
         return this.parentProgram;
-    }
-
-    public void loadInstances(FlowNode flowNode, String referenceID) {
-        DataBank.saveInstanceObject(referenceID, flowNode.getContainedText(), flowNode.getSource());
-
-        for (FlowNode loopFlowNode : flowNode.getChildren()) {
-            loadInstances(loopFlowNode, referenceID);
-        }
-    }
-
-    private Boolean compile(FlowNode flowNode) {
-        System.out.println("Compiling " + flowNode.getId() + " -> " + flowNode.getContainedText());
-        Boolean result = flowNode.getSource().compile();
-
-        for (FlowNode loopFlowNode : flowNode.getChildren()) {
-            compile(loopFlowNode);
-        }
-
-        return result;
     }
 
     private Boolean checkIfTreeIsCompiled(FlowNode flowNode) {

@@ -7,11 +7,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="jsch-0.1.51" level="project" />
-    <orderEntry type="library" name="rsyntaxtextarea" level="project" />
-    <orderEntry type="library" name="jna" level="project" />
-    <orderEntry type="library" name="mysql-connector-java-5.0.8-bin" level="project" />
-    <orderEntry type="library" name="selenium-java-2.42.2" level="project" />
+    <orderEntry type="library" name="lib" level="project" />
     <orderEntry type="library" name="selenium" level="project" />
   </component>
   <component name="org.twodividedbyzero.idea.findbugs">

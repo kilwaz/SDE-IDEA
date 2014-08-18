@@ -19,14 +19,20 @@ public class MySQLConnection {
         reference_id VARCHAR(100),
         PRIMARY KEY (id));
 
+    create table connection (
+        id INT NOT NULL AUTO_INCREMENT,
+        node_start INT,
+        node_end INT,
+        PRIMARY KEY (id));
+
         insert into node values (default, 1,'YAY', 'hello','s1');
     */
 
     public MySQLConnection() {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            connect = DriverManager.getConnection("jdbc:mysql://localhost:13390/sde?user=spiralinks&password=spiralinks");
-            //connect = DriverManager.getConnection("jdbc:mysql://172.16.10.213/sde?user=spiralinks&password=spiralinks");
+            //connect = DriverManager.getConnection("jdbc:mysql://localhost:13390/sde?user=spiralinks&password=spiralinks");
+            connect = DriverManager.getConnection("jdbc:mysql://172.16.10.213/sde?user=spiralinks&password=spiralinks");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {

@@ -19,6 +19,7 @@ public class FlowNode {
     private Source source = null;
     private FlowNode parent = null;
     private FlowController parentController;
+    private Integer programId = -1;
 
     public FlowNode(Double x, Double y) {
         this.x = x;
@@ -39,7 +40,7 @@ public class FlowNode {
         this.source = new Source(this);
     }
 
-    public FlowNode(Double x, Double y, String containedText, String source, Integer id) {
+    public FlowNode(Double x, Double y, String containedText, String source, Integer id, Integer programId) {
         this.x = x;
         this.y = y;
         this.height = 40.0;
@@ -47,11 +48,12 @@ public class FlowNode {
         this.color = Color.BLACK;
         this.containedText = containedText;
         this.id = id;
+        this.programId = programId;
         this.source = new Source(this, source, id);
     }
 
     public void addChild(FlowNode flowNode) {
-        flowNode.setId(getId() + children.size());
+        //flowNode.setId(getId() + children.size());
         flowNode.setParent(this);
         children.add(flowNode);
     }
@@ -160,6 +162,14 @@ public class FlowNode {
 
     public void setScale(Double scale) {
         this.scale = scale;
+    }
+
+    public Integer getProgramId() {
+        return this.programId;
+    }
+
+    public void setProgramId(Integer programId) {
+        this.programId = programId;
     }
 
     public void run() {

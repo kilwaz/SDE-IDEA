@@ -81,7 +81,9 @@ public class CanvasController {
         setFlowNodeScale(program.getFlowController().getStartNode(), this.scale);
         gc.clearRect(0, 0, canvasFlow.getWidth(), canvasFlow.getHeight());
 
-        drawNode(program.getFlowController().getStartNode());
+        for (FlowNode node : program.getFlowController().getSources()) {
+            drawNode(node);
+        }
     }
 
     public void drawNode(FlowNode flowNode) {
@@ -95,17 +97,17 @@ public class CanvasController {
         double innerLoop = 0;
         //colourCounter
 
-        for (double j = 0; j < 10; j++) {
-            for (innerLoop = colourCounter; innerLoop < 0.7; innerLoop = innerLoop + 0.05) {
-                gc.setFill(new Color(innerLoop, innerLoop, innerLoop, 0.75));
-                gc.fillRect(flowNode.getScaledX() + 20 + offsetThing, flowNode.getScaledY() + 42, 2, 2);
-                offsetThing++;
-            }
-        }
-        colourCounter = colourCounter + 0.05;
-        if (colourCounter > 0.7) {
-            colourCounter = 0.0;
-        }
+//        for (double j = 0; j < 10; j++) {
+//            for (innerLoop = colourCounter; innerLoop < 0.7; innerLoop = innerLoop + 0.05) {
+//                gc.setFill(new Color(innerLoop, innerLoop, innerLoop, 0.75));
+//                gc.fillRect(flowNode.getScaledX() + 20 + offsetThing, flowNode.getScaledY() + 42, 2, 2);
+//                offsetThing++;
+//            }
+//        }
+//        colourCounter = colourCounter + 0.05;
+//        if (colourCounter > 0.7) {
+//            colourCounter = 0.0;
+//        }
 
         drawContainedText(flowNode);
 

@@ -115,6 +115,22 @@ public class Controller implements Initializable {
             }
         });
 
+        canvasFlow.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (skipCanvasClick) {
+                    skipCanvasClick = false;
+                } else {
+                    Program program = DataBank.currentlyEditProgram;
+                    List<FlowNode> clickNodes = program.getFlowController().getClickedNodes(event.getX(), event.getY());
+                    if (clickNodes.size() > 0) {
+                        FlowNode flowNode = clickNodes.get(0);
+                        createOrShowSourceTab(flowNode);
+                    }
+                }
+            }
+        });
+
         canvasFlow.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
             @Override
             public void handle(ContextMenuEvent event) {
@@ -132,7 +148,9 @@ public class Controller implements Initializable {
                             FlowNode flowNode = program.getFlowController().getNodeById(Integer.parseInt(((MenuItem) event.getSource()).getId().replace("AddNode-", "")));
 
                             SecureRandom random = new SecureRandom();
-                            flowNode.addChild(new FlowNode(flowNode.getX() + 90, flowNode.getY(), new BigInteger(40, random).toString(32)));
+                            FlowNode newFlowNode = new FlowNode(flowNode.getX() + 90, flowNode.getY(), new BigInteger(40, random).toString(32));
+                            program.getFlowController().addSource(newFlowNode);
+                            DataBank.saveNode(newFlowNode); // We need to save the node after creating it to assign the ID correctly
                             canvasController.drawProgram(program);
                         }
                     });
@@ -151,7 +169,7 @@ public class Controller implements Initializable {
                             Tab tabToRemove = null;
                             for (Tab loopTab : tabPaneSource.getTabs()) {
                                 if (loopTab.getId() != null) {
-                                    if (loopTab.getId().equals(flowNode.getId())) {
+                                    if (loopTab.getId().equals(flowNode.getId().toString())) {
                                         tabToRemove = loopTab;
                                     }
                                 }
@@ -173,22 +191,6 @@ public class Controller implements Initializable {
                     contextMenu.getItems().add(menuItemFlowAddNode);
                     contextMenu.getItems().add(menuItemFlowRemoveNode);
                     contextMenu.show(canvasFlow, event.getScreenX(), event.getScreenY());
-                }
-            }
-        });
-
-        canvasFlow.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (skipCanvasClick) {
-                    skipCanvasClick = false;
-                } else {
-                    Program program = DataBank.currentlyEditProgram;
-                    List<FlowNode> clickNodes = program.getFlowController().getClickedNodes(event.getX(), event.getY());
-                    if (clickNodes.size() > 0) {
-                        FlowNode flowNode = clickNodes.get(0);
-                        createOrShowSourceTab(flowNode);
-                    }
                 }
             }
         });
@@ -341,7 +343,7 @@ public class Controller implements Initializable {
 
                     for (Tab loopTab : tabPaneSource.getTabs()) {
                         if (loopTab.getId() != null) {
-                            if (loopTab.getId().equals(flowNode.getId())) {
+                            if (loopTab.getId().equals(flowNode.getId().toString())) {
                                 loopTab.setText(nameField.getText());
                             }
                         }

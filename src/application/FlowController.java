@@ -7,6 +7,7 @@ import java.util.List;
 
 public class FlowController {
     private FlowNode startNode;
+    private List<FlowNode> sources = new ArrayList<FlowNode>();
     private String referenceID = "test";
     private Program parentProgram;
 
@@ -16,12 +17,23 @@ public class FlowController {
         startNode.setId(-1);
     }
 
-    public void createNewNode(Integer id, String containedText, String source, String referenceID, Boolean isStartNode) {
+    public void createNewNode(Integer id, Integer programId, String containedText, String source, String referenceID, Boolean isStartNode) {
+        FlowNode newNode = new FlowNode(30.0, 30.0, containedText, source, id, programId);
+        sources.add(newNode);
         if (isStartNode) {
-            startNode = new FlowNode(30.0, 30.0, containedText, source, id);
+            startNode = newNode;
         }
 
         this.referenceID = referenceID;
+    }
+
+    public void addSource(FlowNode flowNode) {
+        flowNode.setProgramId(parentProgram.getId());
+        sources.add(flowNode);
+    }
+
+    public List<FlowNode> getSources() {
+        return this.sources;
     }
 
     public FlowNode getStartNode() {
@@ -57,13 +69,8 @@ public class FlowController {
     }
 
     private Boolean compile(FlowNode flowNode) {
-        Boolean result = true;
-
         System.out.println("Compiling " + flowNode.getId() + " -> " + flowNode.getContainedText());
-        Boolean compileResult = flowNode.getSource().compile();
-        if (result) {
-            result = compileResult;
-        }
+        Boolean result = flowNode.getSource().compile();
 
         for (FlowNode loopFlowNode : flowNode.getChildren()) {
             compile(loopFlowNode);
@@ -87,62 +94,35 @@ public class FlowController {
 
     public List<FlowNode> getClickedNodes(Double x, Double y) {
         List<FlowNode> nodeList = new ArrayList<FlowNode>();
-        return checkNodeCoords(x, y, startNode, nodeList);
-    }
 
-    private List<FlowNode> checkNodeCoords(Double x, Double y, FlowNode flowNode, List<FlowNode> nodeList) {
-        if (flowNode.isCoordInside(x, y)) {
-            nodeList.add(flowNode);
+        for (FlowNode node : sources) {
+            if (node.isCoordInside(x, y)) {
+                nodeList.add(node);
+            }
         }
 
-        for (FlowNode loopFlowNode : flowNode.getChildren()) {
-            checkNodeCoords(x, y, loopFlowNode, nodeList);
-        }
         return nodeList;
     }
 
     public FlowNode getNodeById(Integer id) {
-        return getNodeById(startNode, id);
+        for (FlowNode node : sources) {
+            if (node.getId().equals(id)) {
+                return node;
+            }
+        }
+
+        return null;
     }
 
-    private FlowNode getNodeById(FlowNode flowNode, Integer id) {
-        FlowNode result = null;
-        if (flowNode.getId().equals(id)) {
-            return flowNode;
-        } else {
-            for (FlowNode loopFlowNode : flowNode.getChildren()) {
-                result = getNodeById(loopFlowNode, id);
-                if (result != null) {
-                    break;
+    public static FlowController getFlowControllerFromSource(Source source) {
+        for (Program program : DataBank.getPrograms()) {
+            for (FlowNode node : program.getFlowController().getSources()) {
+                if (node.getSource() == source) {
+                    return program.getFlowController();
                 }
             }
         }
 
-        return result;
-    }
-
-    public static FlowController getFlowControllerFromSource(Source source) {
-        FlowController foundController = null;
-        for (Program program : DataBank.getPrograms()) {
-            Boolean found = findSource(program.getFlowController().getStartNode(), source);
-            if (found) {
-                foundController = program.getFlowController();
-                break;
-            }
-
-        }
-
-        return foundController;
-    }
-
-    private static Boolean findSource(FlowNode flowNode, Source source) {
-        if (flowNode.getSource() == source) {
-            return true;
-        } else {
-            for (FlowNode loopNode : flowNode.getChildren()) {
-                findSource(loopNode, source);
-            }
-        }
-        return false;
+        return null;
     }
 }

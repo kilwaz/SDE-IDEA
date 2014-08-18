@@ -1,6 +1,5 @@
 package application.utils;
 
-import application.FlowController;
 import application.FlowNode;
 import application.MySQLConnection;
 import application.Program;
@@ -126,19 +125,17 @@ public class DataBank {
                 preparedStatement.close();
 
                 if (result == 0) { // If record does not exist insert a new one..
-                    Integer nextID = getNextId("node");  // Gets the next ID for node that is about to be created
+                    node.setId(getNextId("node")); // Gets the next ID for a node that is about to be created
 
                     preparedStatement = mySQLInstance.getPreparedStatement("insert into node values (default, ?, ?, ?, ?)");
                     if (preparedStatement != null) {
-                        preparedStatement.setInt(1, FlowController.getFlowControllerFromSource(node.getSource()).getParentProgram().getId());
+                        preparedStatement.setInt(1, node.getProgramId());
                         preparedStatement.setString(2, node.getContainedText());
                         preparedStatement.setString(3, node.getSource().getSource());
                         preparedStatement.setInt(4, node.getId());
                         preparedStatement.executeUpdate();
                         preparedStatement.close();
                     }
-
-                    node.setId(nextID);
                 }
             }
         } catch (SQLException e) {
@@ -157,11 +154,12 @@ public class DataBank {
                 String name = resultSet.getString("name");
                 Integer programId = resultSet.getInt("id");
                 Program loadedProgram = new Program(name, programId);
-                ResultSet sourceResultSet = mySQLInstance.runQuery("select id,source,contained_text,reference_id from node where program_id = '" + programId + "';");
+                ResultSet sourceResultSet = mySQLInstance.runQuery("select id,program_id,source,contained_text,reference_id from node where program_id = '" + programId + "';");
 
                 while (sourceResultSet.next()) {
                     loadedProgram.getFlowController().createNewNode(
                             sourceResultSet.getInt("id"),
+                            sourceResultSet.getInt("program_id"),
                             sourceResultSet.getString("contained_text"),
                             sourceResultSet.getString("source"),
                             sourceResultSet.getString("reference_id"),

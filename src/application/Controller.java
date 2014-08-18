@@ -157,7 +157,7 @@ public class Controller implements Initializable {
                     menuItemFlowAddNode.setId("AddNode-" + flowNode.getId());
 
                     MenuItem menuItemFlowStartNode = new MenuItem("Set Start Node");
-                    menuItemFlowAddNode.setOnAction(new EventHandler<ActionEvent>() {
+                    menuItemFlowStartNode.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent event) {
                             Program program = DataBank.currentlyEditProgram;

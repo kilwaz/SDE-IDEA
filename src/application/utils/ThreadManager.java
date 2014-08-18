@@ -14,13 +14,12 @@ public class ThreadManager {
 
     public void addThread(Thread thread) {
         runningThreads.add(thread);
-        System.out.println("Added thread, is alive - " + thread.isAlive());
     }
 
     public void closeThreads() {
-        for (Thread thread : runningThreads) {
-            System.out.println("Is thread done .. " + thread.getState().name());
-        }
+//        for (Thread thread : runningThreads) {
+//            System.out.println("Is thread done .. " + thread.getState().name());
+//        }
     }
 
     public static ThreadManager getInstance() {

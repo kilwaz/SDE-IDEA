@@ -77,7 +77,7 @@ public class DataBank {
         programInstances.put(referenceID, instances);
     }
 
-    public static Object loadInstanceObject(String referenceID, String name) {
+    public static Object getInstanceObject(String referenceID, String name) {
         HashMap<String, Object> instances = programInstances.get(referenceID);
         if (instances != null) {
             return instances.get(name);

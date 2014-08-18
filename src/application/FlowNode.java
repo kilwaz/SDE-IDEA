@@ -173,7 +173,7 @@ public class FlowNode {
     }
 
     public void run() {
-        this.source.run();
+        this.source.run(false);
     }
 
     public Boolean isCoordInside(Double x, Double y) {

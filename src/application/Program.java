@@ -47,9 +47,9 @@ public class Program {
         this.flowController.getStartNode().run();
     }
 
-    public static void runHelper(String name, String referenceID) {
-        Source source = (Source) DataBank.loadInstanceObject(referenceID, name);
-        source.run();
+    public static void runHelper(String name, String referenceID, Boolean whileWaiting) {
+        Source source = (Source) DataBank.getInstanceObject(referenceID, name);
+        source.run(whileWaiting);
     }
 
     public String toString() {

@@ -68,14 +68,21 @@ public class Source {
         return false;
     }
 
-    public void run() {
+    public void run(Boolean whileWaiting) {
         if (!this.compiled) {
             compile();
         }
         if (this.compiled) {
             Thread t = new Thread((Runnable) compiledInstance);
-            t.start();
             ThreadManager.getInstance().addThread(t);
+            t.start();
+            if (whileWaiting) {
+                try {
+                    t.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }

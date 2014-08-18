@@ -38,7 +38,10 @@ public class CompileCode {
                     "      return DataBank.loadVariable(name, this.referenceID);" +
                     "   }" +
                     "   private void run(String name) {" +
-                    "      Program.runHelper(name, this.referenceID);" +
+                    "      Program.runHelper(name, this.referenceID, false);" +
+                    "   }" +
+                    "   private void runAndWait(String name) {" +
+                    "      Program.runHelper(name, this.referenceID, true);" +
                     "   }" +
                     "}";
 

@@ -1,6 +1,7 @@
 package application;
 
 import application.utils.DataBank;
+import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -158,6 +159,30 @@ public class FlowController {
             for (FlowNode node : program.getFlowController().getSources()) {
                 if (node.getSource() == source) {
                     return program.getFlowController();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static void sourceStarted(String reference) {
+        FlowNode flowNode = FlowController.getSourceFromReference(reference);
+        flowNode.setColor(Color.RED);
+        Controller.getInstance().updateCanvasController();
+    }
+
+    public static void sourceFinished(String reference) {
+        FlowNode flowNode = FlowController.getSourceFromReference(reference);
+        flowNode.setColor(Color.BLACK);
+        Controller.getInstance().updateCanvasController();
+    }
+
+    public static FlowNode getSourceFromReference(String reference) {
+        for (Program program : DataBank.getPrograms()) {
+            for (FlowNode node : program.getFlowController().getSources()) {
+                if (node.getId().toString().equals(reference)) {
+                    return node;
                 }
             }
         }

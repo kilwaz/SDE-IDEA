@@ -13,7 +13,7 @@ public class Source {
 
     Source(FlowNode parentFlowNode) {
         this.parentFlowNode = parentFlowNode;
-        this.source = "public void run() {\n" +
+        this.source = "public void function() {\n" +
                 "   System.out.println(\"Sample code\");\n" +
                 "}";
     }

@@ -37,7 +37,7 @@ public class Main extends Application {
 //        WebDriver driver = new ChromeDriver(capabilities);
 //        driver.get("http://www.spiralinks.com");
 //
-//        WebDriverWait wait = new WebDriverWait(driver, 10);
+        //WebDriverWait wait = new WebDriverWait(driver, 10);
 //        wait.until(ExpectedConditions.elementToBeClickable(By.id("menu-item-370")));
 //
 //        // Find the text input element by its name

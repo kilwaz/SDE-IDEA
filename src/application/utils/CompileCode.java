@@ -19,29 +19,39 @@ public class CompileCode {
     public static Object compileCode(Source source) {
         Object instance = null;
         String className = "SDEClass" + source.getId() + "C" + counter;
-        String referenceID = "[Unloaded Reference]";
+        String flowControllerReferenceId = "[Unloaded FlowController]";
+        String sourceReferenceId = "[Unloaded FlowController]";
         try {
             // Prepare source somehow.
-            referenceID = FlowController.getFlowControllerFromSource(source).getReferenceID();
+            flowControllerReferenceId = FlowController.getFlowControllerFromSource(source).getReferenceID();
+            sourceReferenceId = source.getId().toString();
             String sourceString = "package programs;" +
                     "import application.utils.*;" +
                     "import org.openqa.selenium.*;" +
+                    "import org.openqa.selenium.support.ui.*;" +
                     "import application.Program;" +
+                    "import application.FlowController;" +
                     "import application.net.SSHManager;" +
                     "public class " + className + " implements Runnable {" +
-                    " private String referenceID = \"" + referenceID + "\";" +
-                    "  " + source.getSource() + "" +
+                    "   private String flowControllerReferenceId = \"" + flowControllerReferenceId + "\";" +
+                    "   private String sourceReferenceId = \"" + sourceReferenceId + "\";" +
+                    "" + source.getSource() + "" +
+                    "   public void run() {" +
+                    "      FlowController.sourceStarted(this.sourceReferenceId);" +
+                    "      function();" +
+                    "      FlowController.sourceFinished(this.sourceReferenceId);" +
+                    "   }" +
                     "   private void save(String name, Object object) {" +
-                    "      DataBank.saveVariable(name, object, this.referenceID);" +
+                    "      DataBank.saveVariable(name, object, this.flowControllerReferenceId);" +
                     "   }" +
                     "   private Object load(String name) {" +
-                    "      return DataBank.loadVariable(name, this.referenceID);" +
+                    "      return DataBank.loadVariable(name, this.flowControllerReferenceId);" +
                     "   }" +
                     "   private void run(String name) {" +
-                    "      Program.runHelper(name, this.referenceID, false);" +
+                    "      Program.runHelper(name, this.flowControllerReferenceId, false);" +
                     "   }" +
                     "   private void runAndWait(String name) {" +
-                    "      Program.runHelper(name, this.referenceID, true);" +
+                    "      Program.runHelper(name, this.flowControllerReferenceId, true);" +
                     "   }" +
                     "}";
 
@@ -101,7 +111,7 @@ public class CompileCode {
                     .owner(null)
                     .title("Compile Error")
                     .masthead(null)
-                    .message("Exception encountered while trying to compile " + referenceID)
+                    .message("Exception encountered while trying to compile " + flowControllerReferenceId)
                     .showException(ex);
         }
         counter++;

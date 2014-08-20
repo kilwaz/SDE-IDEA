@@ -2,7 +2,6 @@ package application;
 
 import application.net.SSHManager;
 import application.utils.DataBank;
-import application.utils.SourceEditer;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -277,6 +276,7 @@ public class Controller implements Initializable {
 
                     public void changed(ObservableValue<? extends Program> ov, Program oldProgram, Program newProgram) {
                         DataBank.currentlyEditProgram = newProgram;
+                        newProgram.getFlowController().checkConnections();
                         canvasController.drawProgram(newProgram);
                     }
                 });
@@ -293,19 +293,6 @@ public class Controller implements Initializable {
                 }
             }
         });
-
-        Tab tab = new Tab();
-        tab.setText("Source Test");
-
-        AnchorPane tabAnchorPane = new AnchorPane();
-
-        SourceEditer sourceEditer = new SourceEditer(600, 400);
-        tabAnchorPane.getChildren().add(sourceEditer);
-        sourceEditer.draw();
-
-        tab.setContent(sourceEditer);
-        tabPaneSource.getTabs().add(tab);
-        tabPaneSource.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
     }
 
     public void createOrShowSourceTab(FlowNode flowNode) {

@@ -72,16 +72,25 @@ public class CanvasController {
     }
 
     public void setFlowNodeScale(FlowNode flowNode, Double scale) {
-        flowNode.setScale(scale);
-        for (FlowNode loopFlowNode : flowNode.getChildren()) {
-            setFlowNodeScale(loopFlowNode, scale);
-        }
+//        flowNode.setScale(scale);
+//        for (FlowNode loopFlowNode : flowNode.getChildren()) {
+//            setFlowNodeScale(loopFlowNode, scale);
+//        }
     }
 
     public void drawProgram(Program program) {
         setFlowNodeScale(program.getFlowController().getStartNode(), this.scale);
-        gc.clearRect(0, 0, canvasFlow.getWidth(), canvasFlow.getHeight());
+        gc.clearRect(0, 0, canvasFlow.getWidth(), canvasFlow.getHeight()); // Clears the screen
 
+        // Draw the bottom layer first and build up
+        // Connections
+        Integer offset = 0;
+        for (SourceConnection connection : program.getFlowController().getConnections()) {
+            drawConnectingLine(connection.getConnectionStart(), connection.getConnectionEnd(), offset);
+            offset++;
+        }
+
+        // Nodes
         for (FlowNode node : program.getFlowController().getSources()) {
             drawNode(node);
         }
@@ -111,13 +120,6 @@ public class CanvasController {
 //        }
 
         drawContainedText(flowNode);
-
-        Integer offset = 0;
-        for (FlowNode loopFlowNode : flowNode.getChildren()) {
-            drawConnectingLine(flowNode, loopFlowNode, offset);
-            drawNode(loopFlowNode);
-            offset++;
-        }
     }
 
     public void drawContainedText(FlowNode flowNode) {

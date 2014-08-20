@@ -1,7 +1,7 @@
 package application.net;
 
 import application.Controller;
-import application.utils.ConnectionManager;
+import application.utils.SSHConnectionManager;
 import application.utils.ThreadManager;
 import com.jcraft.jsch.*;
 
@@ -43,7 +43,7 @@ public class SSHManager {
                 knownHostsFileName);
         intConnectionPort = connectionPort;
         intTimeOut = 60000;
-        ConnectionManager.getInstance().addConnection(this);
+        SSHConnectionManager.getInstance().addConnection(this);
     }
 
     public String connect() {

@@ -21,7 +21,6 @@ public class BrowserManager {
     public void closeBrowsers() {
         for (WebDriver driver : runningBrowsers) {
             driver.quit();
-            System.out.println("QUIT!");
         }
     }
 

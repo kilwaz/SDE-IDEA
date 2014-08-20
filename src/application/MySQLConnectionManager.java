@@ -2,9 +2,9 @@ package application;
 
 import java.sql.*;
 
-public class MySQLConnection {
+public class MySQLConnectionManager {
     private Connection connect = null;
-    private static MySQLConnection instance;
+    private static MySQLConnectionManager instance;
     /*
     create table program(
         id INT NOT NULL AUTO_INCREMENT,
@@ -30,7 +30,7 @@ public class MySQLConnection {
         insert into node values (default, 1,'YAY', 'hello','s1',10,10);
     */
 
-    public MySQLConnection() {
+    public MySQLConnectionManager() {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             //connect = DriverManager.getConnection("jdbc:mysql://localhost:13390/sde?user=spiralinks&password=spiralinks");
@@ -94,7 +94,7 @@ public class MySQLConnection {
         }
     }
 
-    public static MySQLConnection getInstance() {
+    public static MySQLConnectionManager getInstance() {
         return instance;
     }
 } 

@@ -173,7 +173,6 @@ public class Controller implements Initializable {
                         public void handle(ActionEvent event) {
                             Program program = DataBank.currentlyEditProgram;
                             FlowNode flowNode = program.getFlowController().getNodeById(Integer.parseInt(((MenuItem) event.getSource()).getId().replace("RemoveNode-", "")));
-                            flowNode.delete();
 
                             canvasController.drawProgram(program);
 
@@ -406,6 +405,15 @@ public class Controller implements Initializable {
         }
 
         Platform.runLater(new OneShotTask(text));
+    }
+
+    public void updateCanvasController() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                canvasController.drawProgram(DataBank.currentlyEditProgram);
+            }
+        });
     }
 
     public static Controller getInstance() {

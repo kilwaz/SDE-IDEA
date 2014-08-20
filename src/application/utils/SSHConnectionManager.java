@@ -5,12 +5,12 @@ import application.net.SSHManager;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConnectionManager {
-    private static ConnectionManager connectionManager;
+public class SSHConnectionManager {
+    private static SSHConnectionManager SSHConnectionManager;
     private List<SSHManager> openConnections;
 
-    public ConnectionManager() {
-        connectionManager = this;
+    public SSHConnectionManager() {
+        SSHConnectionManager = this;
         openConnections = new ArrayList<SSHManager>();
     }
 
@@ -25,7 +25,7 @@ public class ConnectionManager {
         }
     }
 
-    public static ConnectionManager getInstance() {
-        return connectionManager;
+    public static SSHConnectionManager getInstance() {
+        return SSHConnectionManager;
     }
 }

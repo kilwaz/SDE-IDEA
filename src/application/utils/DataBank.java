@@ -1,7 +1,7 @@
 package application.utils;
 
 import application.FlowNode;
-import application.MySQLConnection;
+import application.MySQLConnectionManager;
 import application.Program;
 
 import java.sql.PreparedStatement;
@@ -16,7 +16,7 @@ public class DataBank {
     static private HashMap<Integer, Program> programs = new HashMap<Integer, Program>();
     static private HashMap<String, HashMap<String, Object>> programVariables = new HashMap<String, HashMap<String, Object>>();
     static private HashMap<String, HashMap<String, Object>> programInstances = new HashMap<String, HashMap<String, Object>>();
-    static private MySQLConnection mySQLInstance;
+    static private MySQLConnectionManager mySQLInstance;
 
     static public List<String> getProgramNames() {
         List<String> nameList = new ArrayList<String>();
@@ -95,7 +95,7 @@ public class DataBank {
         addProgram(newProgram);
         try {
             if (mySQLInstance == null) {
-                mySQLInstance = MySQLConnection.getInstance();
+                mySQLInstance = MySQLConnectionManager.getInstance();
             }
 
             PreparedStatement preparedStatement = mySQLInstance.getPreparedStatement("insert into program values (default, ?)");
@@ -113,7 +113,7 @@ public class DataBank {
     public static void saveNode(FlowNode node) {
         try {
             if (mySQLInstance == null) {
-                mySQLInstance = MySQLConnection.getInstance();
+                mySQLInstance = MySQLConnectionManager.getInstance();
             }
 
             PreparedStatement preparedStatement = mySQLInstance.getPreparedStatement("update node set contained_text = ?, source = ?, source_x = ?, source_y = ? where id = ?");
@@ -150,7 +150,7 @@ public class DataBank {
     public static void loadPrograms() {
         try {
             if (mySQLInstance == null) {
-                mySQLInstance = MySQLConnection.getInstance();
+                mySQLInstance = MySQLConnectionManager.getInstance();
             }
 
             ResultSet resultSet = mySQLInstance.runQuery("select id,name from program;");
@@ -184,7 +184,7 @@ public class DataBank {
         Integer autoIncrement = -1;
         try {
             if (mySQLInstance == null) {
-                mySQLInstance = MySQLConnection.getInstance();
+                mySQLInstance = MySQLConnectionManager.getInstance();
             }
 
             ResultSet resultSet = mySQLInstance.runQuery("SELECT AUTO_INCREMENT FROM information_schema.tables WHERE table_name = '" + tableName + "' AND table_schema = DATABASE();");

@@ -192,6 +192,7 @@ public class SwingTextArea extends SwingNode implements Runnable {
             Program program = DataBank.currentlyEditProgram;
             if (program != null) {
                 source.setSource(sourceCodeTextArea.getText());
+                program.getFlowController().checkConnections();
             }
         }
     }

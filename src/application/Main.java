@@ -1,8 +1,8 @@
 package application;
 
 import application.utils.BrowserManager;
-import application.utils.ConnectionManager;
 import application.utils.DataBank;
+import application.utils.SSHConnectionManager;
 import application.utils.ThreadManager;
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -15,11 +15,12 @@ import javafx.stage.WindowEvent;
 public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        new MySQLConnection();
-        DataBank.loadFromDatabase();
-        new ConnectionManager();
+        new MySQLConnectionManager();
+        new SSHConnectionManager();
         new ThreadManager();
         new BrowserManager();
+
+        DataBank.loadFromDatabase();
 
         //WebDriver driver = new FirefoxDriver();
         System.setProperty("webdriver.chrome.driver", "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chromedriver.exe");
@@ -70,7 +71,7 @@ public class Main extends Application {
         primaryStage.setTitle("Spiralinks Development Engine V0.1");
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             public void handle(WindowEvent we) {
-                ConnectionManager.getInstance().closeConnections();
+                SSHConnectionManager.getInstance().closeConnections();
                 ThreadManager.getInstance().closeThreads();
                 BrowserManager.getInstance().closeBrowsers();
             }

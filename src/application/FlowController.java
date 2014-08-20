@@ -8,6 +8,7 @@ import java.util.List;
 public class FlowController {
     private FlowNode startNode;
     private List<FlowNode> sources = new ArrayList<FlowNode>();
+    private List<SourceConnection> connections = new ArrayList<SourceConnection>();
     private String referenceID = "test";
     private Program parentProgram;
 
@@ -32,6 +33,14 @@ public class FlowController {
         sources.add(flowNode);
     }
 
+    public void addConnection(SourceConnection connection) {
+        connections.add(connection);
+    }
+
+    public List<SourceConnection> getConnections() {
+        return this.connections;
+    }
+
     public List<FlowNode> getSources() {
         return this.sources;
     }
@@ -49,7 +58,16 @@ public class FlowController {
     }
 
     public Boolean checkIfTreeIsCompiled() {
-        return checkIfTreeIsCompiled(startNode);
+        Boolean result = true;
+
+        for (FlowNode flowNode : sources) {
+            result = flowNode.getSource().isCompiled();
+            if (!result) {
+                break;
+            }
+        }
+
+        return result;
     }
 
     public Boolean compile() {
@@ -68,19 +86,6 @@ public class FlowController {
 
     public Program getParentProgram() {
         return this.parentProgram;
-    }
-
-    private Boolean checkIfTreeIsCompiled(FlowNode flowNode) {
-        Boolean result = true;
-
-        for (FlowNode loopFlowNode : flowNode.getChildren()) {
-            result = checkIfTreeIsCompiled(loopFlowNode);
-            if (!result) {
-                break;
-            }
-        }
-
-        return result;
     }
 
     public List<FlowNode> getClickedNodes(Double x, Double y) {
@@ -103,6 +108,49 @@ public class FlowController {
         }
 
         return null;
+    }
+
+    public void checkConnections() {
+        Boolean updateCanvas = false;
+
+        // Find new connections and creates them
+        for (FlowNode startNode : sources) {
+            String src = startNode.getSource().getSource();
+
+            for (FlowNode endNode : getSources()) {
+                if (src.contains("run(\"" + endNode.getContainedText())) {
+                    if (!connectionExists(startNode, endNode)) {
+                        SourceConnection newConnection = new SourceConnection(startNode, endNode);
+                        connections.add(newConnection);
+                        updateCanvas = true;
+                    }
+                }
+            }
+        }
+
+        // Checks old connections and removes ones that don't exist
+        List<SourceConnection> listToRemove = new ArrayList<SourceConnection>();
+        for (SourceConnection sourceConnection : connections) {
+            if (!sourceConnection.getConnectionStart().getSource().getSource().contains("run(\"" + sourceConnection.getConnectionEnd().getContainedText())) {
+                listToRemove.add(sourceConnection);
+                updateCanvas = true;
+            }
+        }
+
+        connections.removeAll(listToRemove);
+        if (updateCanvas) {
+            Controller.getInstance().updateCanvasController();
+        }
+    }
+
+    public Boolean connectionExists(FlowNode start, FlowNode end) {
+        for (SourceConnection sourceConnection : connections) {
+            if (sourceConnection.getConnectionStart() == start && sourceConnection.getConnectionEnd() == end) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static FlowController getFlowControllerFromSource(Source source) {

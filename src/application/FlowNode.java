@@ -3,9 +3,6 @@ package application;
 import application.utils.DataBank;
 import javafx.scene.paint.Color;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class FlowNode {
     private Double x;
     private Double y;
@@ -13,28 +10,17 @@ public class FlowNode {
     private Double height;
     private Color color;
     private Double scale = 1.0;
-    private List<FlowNode> children = new ArrayList<FlowNode>();
     private String containedText = "";
     private Integer id = -1;
     private Source source = null;
-    private FlowNode parent = null;
     private FlowController parentController;
     private Integer programId = -1;
-
-    public FlowNode(Double x, Double y) {
-        this.x = x;
-        this.y = y;
-        this.height = 40.0;
-        this.width = 40.0;
-        this.color = Color.BLACK;
-        this.source = new Source(this);
-    }
 
     public FlowNode(Double x, Double y, String containedText) {
         this.x = x;
         this.y = y;
         this.height = 40.0;
-        this.width = 40.0;
+        this.width = 50.0;
         this.color = Color.BLACK;
         this.containedText = containedText;
         this.source = new Source(this);
@@ -44,30 +30,12 @@ public class FlowNode {
         this.x = x;
         this.y = y;
         this.height = 40.0;
-        this.width = 40.0;
+        this.width = 50.0;
         this.color = Color.BLACK;
         this.containedText = containedText;
         this.id = id;
         this.programId = programId;
         this.source = new Source(this, source, id);
-    }
-
-    public void addChild(FlowNode flowNode) {
-        //flowNode.setId(getId() + children.size());
-        flowNode.setParent(this);
-        children.add(flowNode);
-    }
-
-    public FlowNode getParent() {
-        return this.parent;
-    }
-
-    public void setParent(FlowNode parent) {
-        this.parent = parent;
-    }
-
-    public List<FlowNode> getChildren() {
-        return children;
     }
 
     public Double getCenterX() {
@@ -184,12 +152,5 @@ public class FlowNode {
         }
 
         return false;
-    }
-
-    public void delete() {
-        children = null;
-        if (parent != null) {
-            parent.getChildren().remove(this);
-        }
     }
 }

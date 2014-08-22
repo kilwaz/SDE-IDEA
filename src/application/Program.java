@@ -2,6 +2,8 @@ package application;
 
 import application.utils.DataBank;
 
+import java.util.HashMap;
+
 public class Program {
     private String programName;
     private FlowController flowController;
@@ -43,13 +45,14 @@ public class Program {
     }
 
     public void run() {
+        getFlowController().setSourceToBlack();
         this.flowController.loadInstances();
         this.flowController.getStartNode().run();
     }
 
-    public static void runHelper(String name, String referenceID, Boolean whileWaiting) {
+    public static void runHelper(String name, String referenceID, Boolean whileWaiting, HashMap<String, Object> map) {
         Source source = (Source) DataBank.getInstanceObject(referenceID, name);
-        source.run(whileWaiting);
+        source.run(whileWaiting, map);
     }
 
     public String toString() {

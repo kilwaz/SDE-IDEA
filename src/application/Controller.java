@@ -396,7 +396,13 @@ public class Controller implements Initializable {
         Platform.runLater(new OneShotTask(text));
     }
 
-    public void updateCanvasController() {
+    // Use this one when on GUI thread
+    public void updateCanvasControllerNow() {
+        canvasController.drawProgram(DataBank.currentlyEditProgram);
+    }
+
+    // Use this one when not on GUI thread
+    public void updateCanvasControllerLater() {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {

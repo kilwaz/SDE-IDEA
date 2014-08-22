@@ -9,14 +9,12 @@ import javax.tools.ToolProvider;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 
 public class CompileCode {
     static int counter = 0;
 
-    public static Object compileCode(Source source) {
+    public static String compileCode(Source source) {
         Object instance = null;
         String className = "SDEClass" + source.getId() + "C" + counter;
         String flowControllerReferenceId = "[Unloaded FlowController]";
@@ -27,6 +25,7 @@ public class CompileCode {
             sourceReferenceId = source.getId().toString();
             String sourceString = "package programs;" +
                     "import application.utils.*;" +
+                    "import java.util.HashMap;" +
                     "import org.openqa.selenium.*;" +
                     "import org.openqa.selenium.support.ui.*;" +
                     "import application.Program;" +
@@ -35,11 +34,15 @@ public class CompileCode {
                     "public class " + className + " implements Runnable {" +
                     "   private String flowControllerReferenceId = \"" + flowControllerReferenceId + "\";" +
                     "   private String sourceReferenceId = \"" + sourceReferenceId + "\";" +
+                    "   private HashMap<String, Object> params;" +
                     "" + source.getSource() + "" +
                     "   public void run() {" +
                     "      FlowController.sourceStarted(this.sourceReferenceId);" +
                     "      function();" +
                     "      FlowController.sourceFinished(this.sourceReferenceId);" +
+                    "   }" +
+                    "   public void init(HashMap<String, Object> params) {" +
+                    "      this.params = params;" +
                     "   }" +
                     "   private void save(String name, Object object) {" +
                     "      DataBank.saveVariable(name, object, this.flowControllerReferenceId);" +
@@ -48,20 +51,20 @@ public class CompileCode {
                     "      return DataBank.loadVariable(name, this.flowControllerReferenceId);" +
                     "   }" +
                     "   private void run(String name) {" +
-                    "      Program.runHelper(name, this.flowControllerReferenceId, false);" +
+                    "      Program.runHelper(name, this.flowControllerReferenceId, false, new HashMap<String, Object>());" +
+                    "   }" +
+                    "   private void run(String name, HashMap<String, Object> map) {" +
+                    "      Program.runHelper(name, this.flowControllerReferenceId, false, map);" +
                     "   }" +
                     "   private void runAndWait(String name) {" +
-                    "      Program.runHelper(name, this.flowControllerReferenceId, true);" +
+                    "      Program.runHelper(name, this.flowControllerReferenceId, true, new HashMap<String, Object>());" +
+                    "   }" +
+                    "   private void runAndWait(String name, HashMap<String, Object> map) {" +
+                    "      Program.runHelper(name, this.flowControllerReferenceId, true, map);" +
                     "   }" +
                     "}";
 
             String userHome = System.getProperty("user.home");
-
-            //File dir = new File("C:\\developers\\alex\\svnwork\\focal-v6-demo-test\\SDE\\out\\production\\SDE\\programs");
-            File dir = new File(userHome, "/SDE/programs");
-            if (dir.exists()) {
-                for (File file : dir.listFiles()) file.delete();
-            }
 
             // Save source in .java file.
             File root = new File(userHome, "/SDE"); // On Windows running on C:\, this is C:\java.
@@ -90,13 +93,14 @@ public class CompileCode {
                         .masthead("Error at line " + lineNumber)
                         .message(errString)
                         .showError();
+                className = null;
             } else {
                 // Load and instantiate compiled class.
-                URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{root.toURI().toURL()});
-                Class<?> cls = Class.forName("programs." + className, true, classLoader);
-                instance = cls.newInstance();
-
-                System.out.println("Compiled " + instance);
+//                URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{root.toURI().toURL()});
+//                Class<?> cls = Class.forName("programs." + className, true, classLoader);
+//                instance = cls.newInstance();
+//
+//                System.out.println("Compiled " + instance);
             }
             if (outString.length() > 1) {
                 Dialogs.create()
@@ -113,8 +117,11 @@ public class CompileCode {
                     .masthead(null)
                     .message("Exception encountered while trying to compile " + flowControllerReferenceId)
                     .showException(ex);
+            className = null;
         }
         counter++;
-        return instance;
+
+        // Returning null classname means that the compile did not succeed.
+        return className;
     }
 }

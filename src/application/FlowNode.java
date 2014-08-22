@@ -3,6 +3,8 @@ package application;
 import application.utils.DataBank;
 import javafx.scene.paint.Color;
 
+import java.util.HashMap;
+
 public class FlowNode {
     private Double x;
     private Double y;
@@ -141,7 +143,7 @@ public class FlowNode {
     }
 
     public void run() {
-        this.source.run(false);
+        this.source.run(false, new HashMap<String, Object>());
     }
 
     public Boolean isCoordInside(Double x, Double y) {

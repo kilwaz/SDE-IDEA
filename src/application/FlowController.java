@@ -73,7 +73,19 @@ public class FlowController {
 
     public Boolean compile() {
         for (FlowNode node : sources) {
-            node.getSource().compile();
+            node.setColor(Color.DARKGOLDENROD);
+        }
+
+        Controller.getInstance().updateCanvasControllerNow();
+
+        for (FlowNode node : sources) {
+            Boolean result = node.getSource().compile();
+            if (result) {
+                node.setColor(Color.GREEN);
+            } else {
+                node.setColor(Color.RED);
+            }
+            Controller.getInstance().updateCanvasControllerNow();
         }
 
         return true; // This should return what the actual compile method returns..
@@ -140,7 +152,7 @@ public class FlowController {
 
         connections.removeAll(listToRemove);
         if (updateCanvas) {
-            Controller.getInstance().updateCanvasController();
+            Controller.getInstance().updateCanvasControllerLater();
         }
     }
 
@@ -169,13 +181,20 @@ public class FlowController {
     public static void sourceStarted(String reference) {
         FlowNode flowNode = FlowController.getSourceFromReference(reference);
         flowNode.setColor(Color.RED);
-        Controller.getInstance().updateCanvasController();
+        Controller.getInstance().updateCanvasControllerLater();
     }
 
     public static void sourceFinished(String reference) {
         FlowNode flowNode = FlowController.getSourceFromReference(reference);
         flowNode.setColor(Color.BLACK);
-        Controller.getInstance().updateCanvasController();
+        Controller.getInstance().updateCanvasControllerLater();
+    }
+
+    public void setSourceToBlack() {
+        for (FlowNode node : sources) {
+            node.setColor(Color.BLACK);
+        }
+        Controller.getInstance().updateCanvasControllerLater();
     }
 
     public static FlowNode getSourceFromReference(String reference) {

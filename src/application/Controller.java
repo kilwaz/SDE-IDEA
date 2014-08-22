@@ -293,6 +293,8 @@ public class Controller implements Initializable {
                 }
             }
         });
+
+        tabPaneSource.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
     }
 
     public void createOrShowSourceTab(FlowNode flowNode) {

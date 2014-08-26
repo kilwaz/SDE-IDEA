@@ -110,6 +110,8 @@ public class CompileCode {
                         .message(outString)
                         .showError();
             }
+            out.close();
+            err.close();
         } catch (Exception ex) {
             Dialogs.create()
                     .owner(null)

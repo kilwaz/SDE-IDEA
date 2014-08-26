@@ -8,6 +8,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -84,5 +85,25 @@ public class BrowserHelper {
     public static void logout(WebDriver driver) {
         WebElement logout = driver.findElement(By.id("logOut"));
         logout.submit();
+    }
+
+    public static void testAjax(WebDriver driver) {
+        WebDriverWait wait = new WebDriverWait(driver, 10);
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("content")));
+        driver.switchTo().frame("content");
+
+        //perfRating.Input..88266683
+
+        WebElement ajaxElement = (new WebDriverWait(driver, 30))
+                .until(new ExpectedCondition<WebElement>() {
+                    @Override
+                    public WebElement apply(WebDriver d) {
+                        WebElement resultElement = d.findElement(By.id("myDynamicElement"));
+                        resultElement.getAttribute("class");
+
+                        return d.findElement(By.id("myDynamicElement"));
+                    }
+                });
+
     }
 }

@@ -1,6 +1,7 @@
 package application;
 
 import application.utils.DataBank;
+import application.utils.ThreadManager;
 
 import java.util.HashMap;
 
@@ -41,7 +42,21 @@ public class Program {
     }
 
     public Boolean compile() {
-        return this.flowController.compile();
+        class CompileRunnable implements Runnable {
+            CompileRunnable() {
+            }
+
+            public void run() {
+                flowController.compile();
+            }
+        }
+
+        Thread t = new Thread(new CompileRunnable());
+        ThreadManager.getInstance().addThread(t);
+        t.start();
+
+        // err this should return what the threaded compile returns but not sure how to do that yet..
+        return true;
     }
 
     public void run() {

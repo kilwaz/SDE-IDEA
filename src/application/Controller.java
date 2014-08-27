@@ -15,6 +15,7 @@ import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
+import org.controlsfx.dialog.Dialogs;
 
 import javax.swing.*;
 import java.math.BigInteger;
@@ -396,11 +397,6 @@ public class Controller implements Initializable {
         Platform.runLater(new OneShotTask(text));
     }
 
-    // Use this one when on GUI thread
-    public void updateCanvasControllerNow() {
-        canvasController.drawProgram(DataBank.currentlyEditProgram);
-    }
-
     // Use this one when not on GUI thread
     public void updateCanvasControllerLater() {
         Platform.runLater(new Runnable() {
@@ -409,6 +405,40 @@ public class Controller implements Initializable {
                 canvasController.drawProgram(DataBank.currentlyEditProgram);
             }
         });
+    }
+
+    public void showError(Dialogs dialogs) {
+        class OneShotTask implements Runnable {
+            Dialogs dialogs;
+
+            OneShotTask(Dialogs dialogs) {
+                this.dialogs = dialogs;
+            }
+
+            public void run() {
+                dialogs.showError();
+            }
+        }
+
+        Platform.runLater(new OneShotTask(dialogs));
+    }
+
+    public void showException(Dialogs dialogs, Exception ex) {
+        class OneShotTask implements Runnable {
+            Exception ex;
+            Dialogs dialogs;
+
+            OneShotTask(Dialogs dialogs, Exception ex) {
+                this.dialogs = dialogs;
+                this.ex = ex;
+            }
+
+            public void run() {
+                dialogs.showException(ex);
+            }
+        }
+
+        Platform.runLater(new OneShotTask(dialogs, ex));
     }
 
     public static Controller getInstance() {

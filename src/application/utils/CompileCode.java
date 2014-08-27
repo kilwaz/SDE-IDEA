@@ -1,5 +1,6 @@
 package application.utils;
 
+import application.Controller;
 import application.FlowController;
 import application.Source;
 import org.controlsfx.dialog.Dialogs;
@@ -25,11 +26,12 @@ public class CompileCode {
             sourceReferenceId = source.getId().toString();
             String sourceString = "package programs;" +
                     "import application.utils.*;" +
-                    "import java.util.HashMap;" +
+                    "import java.util.*;" +
                     "import org.openqa.selenium.*;" +
                     "import org.openqa.selenium.support.ui.*;" +
                     "import application.Program;" +
                     "import application.FlowController;" +
+                    "import application.tester.*;" +
                     "import application.net.SSHManager;" +
                     "public class " + className + " implements Runnable {" +
                     "   private String flowControllerReferenceId = \"" + flowControllerReferenceId + "\";" +
@@ -87,20 +89,12 @@ public class CompileCode {
             if (errString.length() > 1) {
                 String lineNumber = errString.substring(errString.indexOf(className) + className.length() + 6);
                 lineNumber = lineNumber.substring(0, lineNumber.indexOf(":"));
-                Dialogs.create()
+                Controller.getInstance().showError(Dialogs.create()
                         .owner(null)
                         .title("Compile error on " + source.getParentFlowNode().getContainedText())
                         .masthead("Error at line " + lineNumber)
-                        .message(errString)
-                        .showError();
+                        .message(errString));
                 className = null;
-            } else {
-                // Load and instantiate compiled class.
-//                URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{root.toURI().toURL()});
-//                Class<?> cls = Class.forName("programs." + className, true, classLoader);
-//                instance = cls.newInstance();
-//
-//                System.out.println("Compiled " + instance);
             }
             if (outString.length() > 1) {
                 Dialogs.create()
@@ -113,12 +107,11 @@ public class CompileCode {
             out.close();
             err.close();
         } catch (Exception ex) {
-            Dialogs.create()
+            Controller.getInstance().showException(Dialogs.create()
                     .owner(null)
                     .title("Compile Error")
                     .masthead(null)
-                    .message("Exception encountered while trying to compile " + flowControllerReferenceId)
-                    .showException(ex);
+                    .message("Exception encountered while trying to compile " + flowControllerReferenceId), ex);
             className = null;
         }
         counter++;

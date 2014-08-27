@@ -73,19 +73,19 @@ public class FlowController {
 
     public Boolean compile() {
         for (FlowNode node : sources) {
-            node.setColor(Color.DARKGOLDENROD);
+            node.setColor(Color.DARKRED);
         }
 
-        Controller.getInstance().updateCanvasControllerNow();
+        Controller.getInstance().updateCanvasControllerLater();
 
         for (FlowNode node : sources) {
             Boolean result = node.getSource().compile();
             if (result) {
-                node.setColor(Color.GREEN);
+                node.setColor(Color.LIMEGREEN);
             } else {
-                node.setColor(Color.RED);
+                node.setColor(Color.ORANGE);
             }
-            Controller.getInstance().updateCanvasControllerNow();
+            Controller.getInstance().updateCanvasControllerLater();
         }
 
         return true; // This should return what the actual compile method returns..

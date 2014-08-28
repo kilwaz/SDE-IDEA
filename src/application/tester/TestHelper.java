@@ -1,5 +1,6 @@
 package application.tester;
 
+import application.utils.DataBank;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -10,12 +11,41 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestHelper {
-    public static TestCase testAllSelectValues(String id, String frame) {
+    public static List<TestCase> testAllSelectValues(WebDriver driver, String elementId, String elementFrame) {
+        List<TestCase> testCaseList = new ArrayList<TestCase>();
+
+//        WebDriverWait wait = new WebDriverWait(driver, 10);
+//        wait.until(ExpectedConditions.presenceOfElementLocated(By.id(elementFrame)));
+//        driver.switchTo().frame(elementFrame);
+//
+//
+//        Select select = new Select(driver.findElement(By.id(elementId)));
+//        for (WebElement option : select.getOptions()) {
+//
+//            System.out.println("Testing - " + option.getText().trim());
+//            System.out.println("Result - " + testSelectCase(driver, option.getAttribute("value")));
+//        }
+//
+//        driver.switchTo().defaultContent();
+//
+//
+//        TestCase testCase = new TestCase();
+//
+//        testCase.setElementType("select");
+//        testCase.setElementFrame(elementFrame);
+//        testCase.setElementId(elementId);
+
+        return testCaseList;
+    }
+
+    public static TestCase createSelectTestCase(String elementId, String elementFrame, String inputValue, String expectedOutputValue) {
         TestCase testCase = new TestCase();
 
         testCase.setElementType("select");
-        testCase.setElementFrame(frame);
-        testCase.setElementId(id);
+        testCase.setElementFrame(elementFrame);
+        testCase.setElementId(elementId);
+        testCase.setExpectedOutputValue(expectedOutputValue);
+        testCase.setInputValue(inputValue);
 
         return testCase;
     }
@@ -39,5 +69,9 @@ public class TestHelper {
         driver.switchTo().defaultContent();
 
         return employeeID;
+    }
+
+    public static TestResultSet getResultSet(String resultSet, String referenceID) {
+        return (TestResultSet) DataBank.getInstanceObject(referenceID, resultSet);
     }
 }

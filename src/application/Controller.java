@@ -1,6 +1,8 @@
 package application;
 
 import application.net.SSHManager;
+import application.tester.TestResult;
+import application.tester.TestResultSet;
 import application.utils.DataBank;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -10,8 +12,10 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.SingleSelectionModel;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
@@ -61,6 +65,7 @@ public class Controller implements Initializable {
     private CanvasController canvasController;
     private Boolean skipCanvasClick = false;
     private static Controller controller;
+    private Scene scene;
 
     @Override // This method is called by the FXMLLoader when initialization is complete
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
@@ -122,10 +127,14 @@ public class Controller implements Initializable {
                     skipCanvasClick = false;
                 } else {
                     Program program = DataBank.currentlyEditProgram;
-                    List<FlowNode> clickNodes = program.getFlowController().getClickedNodes(event.getX(), event.getY());
+                    List<DrawableNode> clickNodes = program.getFlowController().getClickedNodes(event.getX(), event.getY());
                     if (clickNodes.size() > 0) {
-                        FlowNode flowNode = clickNodes.get(0);
-                        createOrShowSourceTab(flowNode);
+                        DrawableNode drawableNode = clickNodes.get(0);
+                        if (drawableNode instanceof FlowNode) {
+                            createOrShowSourceTab((FlowNode) drawableNode);
+                        } else if (drawableNode instanceof TestResultSet) {
+                            createOrShowResultSetTab((TestResultSet) drawableNode);
+                        }
                     }
                 }
             }
@@ -136,50 +145,65 @@ public class Controller implements Initializable {
             public void handle(ContextMenuEvent event) {
                 Program program = DataBank.currentlyEditProgram;
 
-                List<FlowNode> clickNodes = program.getFlowController().getClickedNodes(event.getX(), event.getY());
+                List<DrawableNode> clickNodes = program.getFlowController().getClickedNodes(event.getX(), event.getY());
                 if (clickNodes.size() > 0) {
-                    FlowNode flowNode = clickNodes.get(0);
-
+                    DrawableNode drawableNode = clickNodes.get(0);
                     MenuItem menuItemFlowAddNode = new MenuItem("Add Node");
                     menuItemFlowAddNode.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent event) {
                             Program program = DataBank.currentlyEditProgram;
-                            FlowNode flowNode = program.getFlowController().getNodeById(Integer.parseInt(((MenuItem) event.getSource()).getId().replace("AddNode-", "")));
+                            DrawableNode clickedNode = program.getFlowController().getNodeById(Integer.parseInt(((MenuItem) event.getSource()).getId().replace("AddNode-", "")));
 
                             SecureRandom random = new SecureRandom();
-                            FlowNode newFlowNode = new FlowNode(flowNode.getX() + 90, flowNode.getY(), new BigInteger(40, random).toString(32));
-                            program.getFlowController().addSource(newFlowNode);
+                            FlowNode newFlowNode = new FlowNode(clickedNode.getX() + 90, clickedNode.getY(), new BigInteger(40, random).toString(32));
+                            program.getFlowController().addNode(newFlowNode);
                             DataBank.saveNode(newFlowNode); // We need to save the node after creating it to assign the ID correctly
                             canvasController.drawProgram(program);
                         }
                     });
-                    menuItemFlowAddNode.setId("AddNode-" + flowNode.getId());
+                    menuItemFlowAddNode.setId("AddNode-" + drawableNode.getId());
+
+                    MenuItem menuItemFlowAddResultSet = new MenuItem("Add Result Node");
+                    menuItemFlowAddResultSet.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent event) {
+                            Program program = DataBank.currentlyEditProgram;
+                            DrawableNode clickedNode = program.getFlowController().getNodeById(Integer.parseInt(((MenuItem) event.getSource()).getId().replace("ResultNode-", "")));
+
+                            SecureRandom random = new SecureRandom();
+                            TestResultSet newResultSet = new TestResultSet(clickedNode.getX() + 90, clickedNode.getY(), new BigInteger(40, random).toString(32));
+                            program.getFlowController().addNode(newResultSet);
+                            DataBank.saveNode(newResultSet); // We need to save the node after creating it to assign the ID correctly
+                            canvasController.drawProgram(program);
+                        }
+                    });
+                    menuItemFlowAddResultSet.setId("ResultNode-" + drawableNode.getId());
 
                     MenuItem menuItemFlowStartNode = new MenuItem("Set Start Node");
                     menuItemFlowStartNode.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent event) {
                             Program program = DataBank.currentlyEditProgram;
-                            FlowNode flowNode = program.getFlowController().getNodeById(Integer.parseInt(((MenuItem) event.getSource()).getId().replace("StartNode-", "")));
-                            program.getFlowController().setStartNode(flowNode);
+                            DrawableNode startNode = program.getFlowController().getNodeById(Integer.parseInt(((MenuItem) event.getSource()).getId().replace("StartNode-", "")));
+                            program.getFlowController().setStartNode(startNode);
                         }
                     });
-                    menuItemFlowStartNode.setId("StartNode-" + flowNode.getId());
+                    menuItemFlowStartNode.setId("StartNode-" + drawableNode.getId());
 
                     MenuItem menuItemFlowRemoveNode = new MenuItem("Remove Node");
                     menuItemFlowRemoveNode.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent event) {
                             Program program = DataBank.currentlyEditProgram;
-                            FlowNode flowNode = program.getFlowController().getNodeById(Integer.parseInt(((MenuItem) event.getSource()).getId().replace("RemoveNode-", "")));
+                            DrawableNode removedNode = program.getFlowController().getNodeById(Integer.parseInt(((MenuItem) event.getSource()).getId().replace("RemoveNode-", "")));
 
                             canvasController.drawProgram(program);
 
                             Tab tabToRemove = null;
                             for (Tab loopTab : tabPaneSource.getTabs()) {
                                 if (loopTab.getId() != null) {
-                                    if (loopTab.getId().equals(flowNode.getId().toString())) {
+                                    if (loopTab.getId().equals(removedNode.getId().toString())) {
                                         tabToRemove = loopTab;
                                     }
                                 }
@@ -195,10 +219,11 @@ public class Controller implements Initializable {
                             }
                         }
                     });
-                    menuItemFlowRemoveNode.setId("RemoveNode-" + flowNode.getId());
+                    menuItemFlowRemoveNode.setId("RemoveNode-" + drawableNode.getId());
 
                     ContextMenu contextMenu = new ContextMenu();
                     contextMenu.getItems().add(menuItemFlowAddNode);
+                    contextMenu.getItems().add(menuItemFlowAddResultSet);
                     contextMenu.getItems().add(menuItemFlowRemoveNode);
                     contextMenu.getItems().add(menuItemFlowStartNode);
                     contextMenu.show(canvasFlow, event.getScreenX(), event.getScreenY());
@@ -298,8 +323,49 @@ public class Controller implements Initializable {
         tabPaneSource.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
     }
 
-    public void createOrShowSourceTab(FlowNode flowNode) {
+    public void createOrShowResultSetTab(TestResultSet testResultSet) {
+        // Test to see if the tab exists and if so show it
+        for (Tab loopTab : tabPaneSource.getTabs()) {
+            if (loopTab.getId() != null) {
+                if (loopTab.getId().equals(testResultSet.getId().toString())) {
+                    SingleSelectionModel<Tab> selectionModel = tabPaneSource.getSelectionModel();
+                    selectionModel.select(loopTab);
+                    return;
+                }
+            }
+        }
+        // As the tab doesn't exist we create it here
         Tab tab = new Tab();
+
+        AnchorPane tabAnchorPane = new AnchorPane();
+        TableView<TestResult> resultsTable = new TableView<TestResult>();
+        resultsTable.setId("resultsTable-" + testResultSet.getId());
+
+        TableColumn expectedOutput = new TableColumn("Expected Output");
+        expectedOutput.setMinWidth(120);
+        expectedOutput.setCellValueFactory(new PropertyValueFactory<TestResult, String>("outcome"));
+
+        TableColumn actualOutput = new TableColumn("Actual Output");
+        actualOutput.setMinWidth(120);
+        actualOutput.setCellValueFactory(new PropertyValueFactory<TestResult, String>("expected"));
+
+        resultsTable.setItems(testResultSet.getResultList());
+        resultsTable.getColumns().addAll(expectedOutput);
+        resultsTable.getColumns().addAll(actualOutput);
+
+        tabAnchorPane.getChildren().add(resultsTable);
+        tab.setText(testResultSet.getContainedText());
+        tab.setId(testResultSet.getId().toString());
+        tab.setContent(tabAnchorPane);
+
+        tabPaneSource.getTabs().add(tab);
+
+        // Go back to the beginning and run the code to show the tab, it should now exist
+        createOrShowResultSetTab(testResultSet);
+    }
+
+    public void createOrShowSourceTab(FlowNode flowNode) {
+        // Test to see if the tab exists and if so show it
         for (Tab loopTab : tabPaneSource.getTabs()) {
             if (loopTab.getId() != null) {
                 if (loopTab.getId().equals(flowNode.getId().toString())) {
@@ -314,14 +380,13 @@ public class Controller implements Initializable {
 
                     TextField textField = (TextField) stackPane.lookup("#fieldName-" + flowNode.getId());
                     textField.setText(flowNode.getContainedText());
-//                    buttonRunProgram.setDisable(!program.isCompiled());
-//                    buttonCompileProgram.setDisable(false);
-//                    fieldProgramName.setDisable(false);
                     return;
                 }
             }
         }
 
+        // As the tab doesn't exist we create it here
+        Tab tab = new Tab();
         tab.setText(flowNode.getContainedText());
         tab.setId(flowNode.getId().toString());
 
@@ -339,12 +404,12 @@ public class Controller implements Initializable {
                 TextField nameField = (TextField) event.getSource();
                 if (!nameField.getText().isEmpty()) {
                     Program program = DataBank.currentlyEditProgram;
-                    FlowNode flowNode = program.getFlowController().getNodeById(Integer.parseInt(nameField.getId().replace("fieldName-", "")));
-                    flowNode.setContainedText(nameField.getText());
+                    DrawableNode nodeToUpdate = program.getFlowController().getNodeById(Integer.parseInt(nameField.getId().replace("fieldName-", "")));
+                    nodeToUpdate.setContainedText(nameField.getText());
 
                     for (Tab loopTab : tabPaneSource.getTabs()) {
                         if (loopTab.getId() != null) {
-                            if (loopTab.getId().equals(flowNode.getId().toString())) {
+                            if (loopTab.getId().equals(nodeToUpdate.getId().toString())) {
                                 loopTab.setText(nameField.getText());
                             }
                         }
@@ -373,6 +438,7 @@ public class Controller implements Initializable {
 
         tabPaneSource.getTabs().add(tab);
 
+        // Go back to the beginning and run the code to show the tab, it should now exist
         createOrShowSourceTab(flowNode);
     }
 
@@ -439,6 +505,14 @@ public class Controller implements Initializable {
         }
 
         Platform.runLater(new OneShotTask(dialogs, ex));
+    }
+
+    public void setScene(Scene scene) {
+        this.scene = scene;
+    }
+
+    public Object getElementById(String id) {
+        return scene.lookup("#" + id);
     }
 
     public static Controller getInstance() {

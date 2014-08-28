@@ -35,17 +35,19 @@ public class Main extends Application {
         System.setProperty("webdriver.chrome.driver", "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chromedriver.exe");
         System.setProperty("webdriver.ie.driver", "C:\\Program Files\\Internet Explorer\\iexplore.exe\"");
 
+        // Sets up interface
         Parent root = FXMLLoader.load(getClass().getResource("ApplicationScene.fxml"));
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Spiralinks Development Engine V0.1");
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             public void handle(WindowEvent we) {
+                // On Application Close
                 SSHConnectionManager.getInstance().closeConnections();
                 ThreadManager.getInstance().closeThreads();
                 BrowserManager.getInstance().closeBrowsers();
 
-                // Cleansup any class or java files previously compiled.
+                // Cleans up any class or java files previously compiled.
                 String userHome = System.getProperty("user.home");
                 File dir = new File(userHome, "/SDE/programs");
                 if (dir.exists()) {
@@ -54,6 +56,7 @@ public class Main extends Application {
             }
         });
         primaryStage.show();
+        Controller.getInstance().setScene(scene);
     }
 
     public static void main(String[] args) {

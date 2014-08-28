@@ -13,6 +13,8 @@ public class TestCase {
     private String elementType;
     private String elementId;
     private String elementFrame;
+    private String inputValue;
+    private String expectedOutputValue;
 
     public TestCase() {
 
@@ -24,6 +26,22 @@ public class TestCase {
 
     public void setElementId(String elementId) {
         this.elementId = elementId;
+    }
+
+    public String getInputValue() {
+        return this.inputValue;
+    }
+
+    public void setInputValue(String inputValue) {
+        this.inputValue = inputValue;
+    }
+
+    public String getExpectedOutputValue() {
+        return this.expectedOutputValue;
+    }
+
+    public void setExpectedOutputValue(String expectedOutputValue) {
+        this.expectedOutputValue = expectedOutputValue;
     }
 
     public String getElementFrame() {
@@ -51,13 +69,14 @@ public class TestCase {
 
         if ("select".equals(elementType)) {
             Select select = new Select(driver.findElement(By.id(elementId)));
-            for (WebElement option : select.getOptions()) {
-                System.out.println("Testing - " + option.getText().trim());
-                System.out.println("Result - " + testSelectCase(driver, option.getAttribute("value")));
-            }
+            select.selectByVisibleText(inputValue);
+
+            testResult.setExpected(expectedOutputValue);
+            testResult.setOutcome(testSelectCase(driver, select.getFirstSelectedOption().getAttribute("value")));
         }
 
         driver.switchTo().defaultContent();
+
         return testResult;
     }
 
@@ -70,8 +89,7 @@ public class TestCase {
         try {
             select.selectByValue(value);
         } catch (NoSuchElementException ex) {
-            System.out.println("Cannot find " + value + " within select box");
-            return "FAIL";
+            return "FAIL Cannot find " + value + " within select box";
         }
 
         return wait.until(new Function<WebDriver, String>() {

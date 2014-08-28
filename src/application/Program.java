@@ -62,7 +62,7 @@ public class Program {
     public void run() {
         getFlowController().setSourceToBlack();
         this.flowController.loadInstances();
-        this.flowController.getStartNode().run();
+        ((FlowNode) this.flowController.getStartNode()).run();
     }
 
     public static void runHelper(String name, String referenceID, Boolean whileWaiting, HashMap<String, Object> map) {

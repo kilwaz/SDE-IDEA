@@ -17,7 +17,7 @@ public class CanvasController {
     private PixelWriter pw;
 
     private Boolean isDraggingNode = false;
-    private FlowNode draggedNode = null;
+    private DrawableNode draggedNode = null;
     private Double dragXOffset = 0.0;
     private Double dragYOffset = 0.0;
     private Double scale = 1.0;
@@ -50,7 +50,7 @@ public class CanvasController {
         if (event.isPrimaryButtonDown()) {
             Program program = DataBank.currentlyEditProgram;
 
-            List<FlowNode> clickedNodes = program.getFlowController().getClickedNodes(event.getX(), event.getY());
+            List<DrawableNode> clickedNodes = program.getFlowController().getClickedNodes(event.getX(), event.getY());
             if (clickedNodes.size() > 0) {
                 draggedNode = clickedNodes.get(0);
                 dragXOffset = draggedNode.getX() - event.getX();
@@ -71,7 +71,7 @@ public class CanvasController {
         }
     }
 
-    public void setFlowNodeScale(FlowNode flowNode, Double scale) {
+    public void setFlowNodeScale(DrawableNode flowNode, Double scale) {
 //        flowNode.setScale(scale);
 //        for (FlowNode loopFlowNode : flowNode.getChildren()) {
 //            setFlowNodeScale(loopFlowNode, scale);
@@ -85,22 +85,22 @@ public class CanvasController {
         // Draw the bottom layer first and build up
         // Connections
         Integer offset = 0;
-        for (SourceConnection connection : program.getFlowController().getConnections()) {
+        for (NodeConnection connection : program.getFlowController().getConnections()) {
             drawConnectingLine(connection.getConnectionStart(), connection.getConnectionEnd(), offset);
             offset++;
         }
 
         // Nodes
-        for (FlowNode node : program.getFlowController().getSources()) {
+        for (DrawableNode node : program.getFlowController().getNodes()) {
             drawNode(node);
         }
     }
 
-    public void drawNode(FlowNode flowNode) {
-        gc.setStroke(flowNode.getColor());
+    public void drawNode(DrawableNode drawableNode) {
+        gc.setStroke(drawableNode.getColor());
         gc.setFill(Color.WHITE);
-        gc.fillRect(flowNode.getScaledX(), flowNode.getScaledY(), flowNode.getScaledWidth(), flowNode.getScaledHeight());
-        gc.strokeRect(flowNode.getScaledX(), flowNode.getScaledY(), flowNode.getScaledWidth(), flowNode.getScaledHeight());
+        gc.fillRect(drawableNode.getScaledX(), drawableNode.getScaledY(), drawableNode.getScaledWidth(), drawableNode.getScaledHeight());
+        gc.strokeRect(drawableNode.getScaledX(), drawableNode.getScaledY(), drawableNode.getScaledWidth(), drawableNode.getScaledHeight());
 
         gc.setFill(Color.GRAY);
         int offsetThing = 0;
@@ -119,20 +119,20 @@ public class CanvasController {
 //            colourCounter = 0.0;
 //        }
 
-        drawContainedText(flowNode);
+        drawContainedText(drawableNode);
     }
 
-    public void drawContainedText(FlowNode flowNode) {
-        if (flowNode.getContainedText() != null) {
+    public void drawContainedText(DrawableNode drawableNode) {
+        if (drawableNode.getContainedText() != null) {
             gc.setTextAlign(TextAlignment.CENTER);
             gc.setTextBaseline(VPos.CENTER);
             gc.setFill(Color.BLACK);
-            gc.fillText(flowNode.getContainedText(), flowNode.getScaledCenterX(), flowNode.getScaledCenterY());
+            gc.fillText(drawableNode.getContainedText(), drawableNode.getScaledCenterX(), drawableNode.getScaledCenterY());
 
         }
     }
 
-    public void drawConnectingLine(FlowNode startNode, FlowNode endNode, Integer offset) {
+    public void drawConnectingLine(DrawableNode startNode, DrawableNode endNode, Integer offset) {
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(1);
 

@@ -52,6 +52,9 @@ public class CompileCode {
                     "   private Object load(String name) {" +
                     "      return DataBank.loadVariable(name, this.flowControllerReferenceId);" +
                     "   }" +
+                    "   private void recordResult(TestResult testResult, String name) {" +
+                    "      TestHelper.getResultSet(name, this.flowControllerReferenceId).addResult(testResult);" +
+                    "   }" +
                     "   private void run(String name) {" +
                     "      Program.runHelper(name, this.flowControllerReferenceId, false, new HashMap<String, Object>());" +
                     "   }" +

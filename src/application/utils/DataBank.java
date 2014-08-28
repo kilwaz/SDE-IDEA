@@ -1,5 +1,6 @@
 package application.utils;
 
+import application.DrawableNode;
 import application.FlowNode;
 import application.MySQLConnectionManager;
 import application.Program;
@@ -16,6 +17,7 @@ public class DataBank {
     static private HashMap<Integer, Program> programs = new HashMap<Integer, Program>();
     static private HashMap<String, HashMap<String, Object>> programVariables = new HashMap<String, HashMap<String, Object>>();
     static private HashMap<String, HashMap<String, Object>> programInstances = new HashMap<String, HashMap<String, Object>>();
+    static private HashMap<String, HashMap<String, Object>> testResultInstances = new HashMap<String, HashMap<String, Object>>();
     static private MySQLConnectionManager mySQLInstance;
 
     static public List<String> getProgramNames() {
@@ -110,7 +112,7 @@ public class DataBank {
         return newProgram;
     }
 
-    public static void saveNode(FlowNode node) {
+    public static void saveNode(DrawableNode node) {
         try {
             if (mySQLInstance == null) {
                 mySQLInstance = MySQLConnectionManager.getInstance();
@@ -119,7 +121,12 @@ public class DataBank {
             PreparedStatement preparedStatement = mySQLInstance.getPreparedStatement("update node set contained_text = ?, source = ?, source_x = ?, source_y = ? where id = ?");
             if (preparedStatement != null) {
                 preparedStatement.setString(1, node.getContainedText());
-                preparedStatement.setString(2, node.getSource().getSource());
+                if (node instanceof FlowNode) {
+                    preparedStatement.setString(2, ((FlowNode) node).getSource().getSource());
+                } else {
+                    preparedStatement.setString(2, "");
+                }
+
                 preparedStatement.setDouble(3, node.getX());
                 preparedStatement.setDouble(4, node.getY());
                 preparedStatement.setInt(5, node.getId());
@@ -133,7 +140,11 @@ public class DataBank {
                     if (preparedStatement != null) {
                         preparedStatement.setInt(1, node.getProgramId());
                         preparedStatement.setString(2, node.getContainedText());
-                        preparedStatement.setString(3, node.getSource().getSource());
+                        if (node instanceof FlowNode) {
+                            preparedStatement.setString(3, ((FlowNode) node).getSource().getSource());
+                        } else {
+                            preparedStatement.setString(3, "");
+                        }
                         preparedStatement.setInt(4, node.getId());
                         preparedStatement.setDouble(5, node.getX());
                         preparedStatement.setDouble(6, node.getY());

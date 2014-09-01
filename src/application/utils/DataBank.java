@@ -1,9 +1,6 @@
 package application.utils;
 
-import application.DrawableNode;
-import application.FlowNode;
-import application.MySQLConnectionManager;
-import application.Program;
+import application.*;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,15 +21,15 @@ public class DataBank {
         List<String> nameList = new ArrayList<String>();
 
         for (Program program : programs.values()) {
-            nameList.add(program.getProgramName());
+            nameList.add(program.getName());
         }
 
         return nameList;
     }
 
 //    static public void renameProgram(Program program, String name) {
-//        programs.remove(program.getProgramName());
-//        program.setProgramName(name);
+//        programs.remove(program.getName());
+//        program.setName(name);
 //        programs.put(name, program);
 //    }
 
@@ -92,6 +89,25 @@ public class DataBank {
         loadPrograms();
     }
 
+    public static void saveProgram(Program program) {
+        try {
+            if (mySQLInstance == null) {
+                mySQLInstance = MySQLConnectionManager.getInstance();
+            }
+
+            PreparedStatement preparedStatement = mySQLInstance.getPreparedStatement("update program set name = ?, start_node = ? where id = ?");
+            if (preparedStatement != null) {
+                preparedStatement.setString(1, program.getName());
+                preparedStatement.setInt(2, program.getFlowController().getStartNode().getId());
+                preparedStatement.setInt(3, program.getId());
+                preparedStatement.executeUpdate();
+                preparedStatement.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static Program createNewProgram(String programName) {
         Program newProgram = new Program(programName);
         addProgram(newProgram);
@@ -100,7 +116,7 @@ public class DataBank {
                 mySQLInstance = MySQLConnectionManager.getInstance();
             }
 
-            PreparedStatement preparedStatement = mySQLInstance.getPreparedStatement("insert into program values (default, ?)");
+            PreparedStatement preparedStatement = mySQLInstance.getPreparedStatement("insert into program values (default, ?, NULL)");
             if (preparedStatement != null) {
                 preparedStatement.setString(1, programName);
                 preparedStatement.executeUpdate();
@@ -164,15 +180,17 @@ public class DataBank {
                 mySQLInstance = MySQLConnectionManager.getInstance();
             }
 
-            ResultSet resultSet = mySQLInstance.runQuery("select id,name from program;");
+            ResultSet resultSet = mySQLInstance.runQuery("select id,name,start_node from program;");
             while (resultSet.next()) {
                 String name = resultSet.getString("name");
                 Integer programId = resultSet.getInt("id");
+                Integer startNode = resultSet.getInt("start_node");
                 Program loadedProgram = new Program(name, programId);
                 ResultSet sourceResultSet = mySQLInstance.runQuery("select id,program_id,source,contained_text,reference_id,source_x,source_y from node where program_id = '" + programId + "';");
+                FlowController flowController = loadedProgram.getFlowController();
 
                 while (sourceResultSet.next()) {
-                    loadedProgram.getFlowController().createNewNode(
+                    flowController.createNewNode(
                             sourceResultSet.getInt("id"),
                             sourceResultSet.getInt("program_id"),
                             sourceResultSet.getString("contained_text"),
@@ -183,6 +201,7 @@ public class DataBank {
                             true);
                 }
 
+                flowController.setStartNode(flowController.getNodeById(startNode));
                 addProgram(loadedProgram);
             }
             resultSet.close();

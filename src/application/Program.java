@@ -6,27 +6,27 @@ import application.utils.ThreadManager;
 import java.util.HashMap;
 
 public class Program {
-    private String programName;
+    private String name;
     private FlowController flowController;
     private Integer id = -1;
 
-    public Program(String programName) {
-        this.programName = programName;
+    public Program(String name) {
+        this.name = name;
         flowController = new FlowController(this);
     }
 
-    public Program(String programName, Integer id) {
-        this.programName = programName;
+    public Program(String name, Integer id) {
+        this.name = name;
         this.id = id;
         flowController = new FlowController(this);
     }
 
-    public String getProgramName() {
-        return this.programName;
+    public String getName() {
+        return this.name;
     }
 
-    public void setProgramName(String programName) {
-        this.programName = programName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public int getId() {
@@ -71,6 +71,6 @@ public class Program {
     }
 
     public String toString() {
-        return "" + this.programName;
+        return "" + this.name;
     }
 }

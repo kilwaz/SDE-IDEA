@@ -187,6 +187,7 @@ public class Controller implements Initializable {
                             Program program = DataBank.currentlyEditProgram;
                             DrawableNode startNode = program.getFlowController().getNodeById(Integer.parseInt(((MenuItem) event.getSource()).getId().replace("StartNode-", "")));
                             program.getFlowController().setStartNode(startNode);
+                            DataBank.saveProgram(program);
                         }
                     });
                     menuItemFlowStartNode.setId("StartNode-" + drawableNode.getId());
@@ -247,7 +248,7 @@ public class Controller implements Initializable {
 
             @Override
             public void handle(ContextMenuEvent event) {
-                clickedName = programList.getSelectionModel().getSelectedItem().getProgramName();
+                clickedName = programList.getSelectionModel().getSelectedItem().getName();
 
                 MenuItem menuItemNewProgram = new MenuItem("New Program");
                 menuItemNewProgram.setOnAction(new EventHandler<ActionEvent>() {

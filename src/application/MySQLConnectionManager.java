@@ -9,6 +9,7 @@ public class MySQLConnectionManager {
     create table program(
         id INT NOT NULL AUTO_INCREMENT,
         name VARCHAR(100),
+        start_node INT,
         PRIMARY KEY (id));
 
     create table node(

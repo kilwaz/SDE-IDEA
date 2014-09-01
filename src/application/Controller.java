@@ -330,6 +330,10 @@ public class Controller implements Initializable {
                 if (loopTab.getId().equals(testResultSet.getId().toString())) {
                     SingleSelectionModel<Tab> selectionModel = tabPaneSource.getSelectionModel();
                     selectionModel.select(loopTab);
+
+                    TextField textField = (TextField) stackPane.lookup("#fieldName-" + testResultSet.getId());
+                    textField.setText(testResultSet.getContainedText());
+
                     return;
                 }
             }
@@ -349,10 +353,19 @@ public class Controller implements Initializable {
         actualOutput.setMinWidth(120);
         actualOutput.setCellValueFactory(new PropertyValueFactory<TestResult, String>("expected"));
 
+        TableColumn duration = new TableColumn("Duration");
+        duration.setMinWidth(120);
+        duration.setCellValueFactory(new PropertyValueFactory<TestResult, String>("duration"));
+
         resultsTable.setItems(testResultSet.getResultList());
         resultsTable.getColumns().addAll(expectedOutput);
         resultsTable.getColumns().addAll(actualOutput);
+        resultsTable.getColumns().addAll(duration);
+        resultsTable.setLayoutX(11);
+        resultsTable.setLayoutY(50);
 
+        tabAnchorPane.getChildren().add(createNodeNameField(testResultSet));
+        tabAnchorPane.getChildren().add(createNodeNameLabel());
         tabAnchorPane.getChildren().add(resultsTable);
         tab.setText(testResultSet.getContainedText());
         tab.setId(testResultSet.getId().toString());
@@ -362,6 +375,47 @@ public class Controller implements Initializable {
 
         // Go back to the beginning and run the code to show the tab, it should now exist
         createOrShowResultSetTab(testResultSet);
+    }
+
+    public TextField createNodeNameField(DrawableNode drawableNode) {
+        TextField nameField = new TextField();
+        nameField.setLayoutX(57);
+        nameField.setLayoutY(13);
+        nameField.setId("fieldName-" + drawableNode.getId());
+
+        nameField.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                TextField nameField = (TextField) event.getSource();
+                if (!nameField.getText().isEmpty()) {
+                    Program program = DataBank.currentlyEditProgram;
+                    DrawableNode nodeToUpdate = program.getFlowController().getNodeById(Integer.parseInt(nameField.getId().replace("fieldName-", "")));
+                    nodeToUpdate.setContainedText(nameField.getText());
+
+                    for (Tab loopTab : tabPaneSource.getTabs()) {
+                        if (loopTab.getId() != null) {
+                            if (loopTab.getId().equals(nodeToUpdate.getId().toString())) {
+                                loopTab.setText(nameField.getText());
+                            }
+                        }
+                    }
+
+                    DataBank.saveNode(nodeToUpdate);
+
+                    canvasController.drawProgram(program);
+                }
+            }
+        });
+
+        return nameField;
+    }
+
+    public Label createNodeNameLabel() {
+        Label nameFieldLabel = new Label();
+        nameFieldLabel.setText("Name:");
+        nameFieldLabel.setLayoutX(11);
+        nameFieldLabel.setLayoutY(17);
+        return nameFieldLabel;
     }
 
     public void createOrShowSourceTab(FlowNode flowNode) {
@@ -391,40 +445,8 @@ public class Controller implements Initializable {
         tab.setId(flowNode.getId().toString());
 
         AnchorPane tabAnchorPane = new AnchorPane();
-
-        TextField nameField = new TextField();
-        nameField.setLayoutX(57);
-        nameField.setLayoutY(13);
-        nameField.setId("fieldName-" + flowNode.getId());
-        tabAnchorPane.getChildren().add(nameField);
-
-        nameField.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                TextField nameField = (TextField) event.getSource();
-                if (!nameField.getText().isEmpty()) {
-                    Program program = DataBank.currentlyEditProgram;
-                    DrawableNode nodeToUpdate = program.getFlowController().getNodeById(Integer.parseInt(nameField.getId().replace("fieldName-", "")));
-                    nodeToUpdate.setContainedText(nameField.getText());
-
-                    for (Tab loopTab : tabPaneSource.getTabs()) {
-                        if (loopTab.getId() != null) {
-                            if (loopTab.getId().equals(nodeToUpdate.getId().toString())) {
-                                loopTab.setText(nameField.getText());
-                            }
-                        }
-                    }
-
-                    canvasController.drawProgram(program);
-                }
-            }
-        });
-
-        Label nameFieldLabel = new Label();
-        nameFieldLabel.setText("Name:");
-        nameFieldLabel.setLayoutX(11);
-        nameFieldLabel.setLayoutY(17);
-        tabAnchorPane.getChildren().add(nameFieldLabel);
+        tabAnchorPane.getChildren().add(createNodeNameField(flowNode));
+        tabAnchorPane.getChildren().add(createNodeNameLabel());
 
         SwingTextArea tabTextArea = new SwingTextArea();
         tabTextArea.setLayoutX(11);

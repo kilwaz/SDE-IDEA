@@ -1,5 +1,6 @@
 package application.tester;
 
+import application.utils.Timer;
 import com.google.common.base.Function;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -72,7 +73,9 @@ public class TestCase {
             select.selectByVisibleText(inputValue);
 
             testResult.setExpected(expectedOutputValue);
+            Timer timer = new Timer();
             testResult.setOutcome(testSelectCase(driver, select.getFirstSelectedOption().getAttribute("value")));
+            testResult.setDuration(timer.getDuration());
         }
 
         driver.switchTo().defaultContent();

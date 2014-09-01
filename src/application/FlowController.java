@@ -106,10 +106,8 @@ public class FlowController {
         for (DrawableNode node : nodes) {
             if (node instanceof FlowNode) {
                 DataBank.saveInstanceObject(referenceID, node.getContainedText(), ((FlowNode) node).getSource());
-                System.out.println("Saved FLOW " + node.getContainedText());
             } else if (node instanceof TestResultSet) {
                 DataBank.saveInstanceObject(referenceID, node.getContainedText(), node);
-                System.out.println("Saved TEST " + node.getContainedText());
             }
         }
     }

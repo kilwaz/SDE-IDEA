@@ -9,35 +9,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class TestHelper {
-    public static List<TestCase> testAllSelectValues(WebDriver driver, String elementId, String elementFrame) {
-        List<TestCase> testCaseList = new ArrayList<TestCase>();
-
-//        WebDriverWait wait = new WebDriverWait(driver, 10);
-//        wait.until(ExpectedConditions.presenceOfElementLocated(By.id(elementFrame)));
-//        driver.switchTo().frame(elementFrame);
-//
-//
-//        Select select = new Select(driver.findElement(By.id(elementId)));
-//        for (WebElement option : select.getOptions()) {
-//
-//            System.out.println("Testing - " + option.getText().trim());
-//            System.out.println("Result - " + testSelectCase(driver, option.getAttribute("value")));
-//        }
-//
-//        driver.switchTo().defaultContent();
-//
-//
-//        TestCase testCase = new TestCase();
-//
-//        testCase.setElementType("select");
-//        testCase.setElementFrame(elementFrame);
-//        testCase.setElementId(elementId);
-
-        return testCaseList;
-    }
-
     public static TestCase createSelectTestCase(String elementId, String elementFrame, String inputValue, String expectedOutputValue) {
         TestCase testCase = new TestCase();
 
@@ -69,6 +43,45 @@ public class TestHelper {
         driver.switchTo().defaultContent();
 
         return employeeID;
+    }
+
+    public static List<String> getWorksheetEmployeeRow(WebDriver driver) {
+        List<String> innerHTML = new ArrayList<String>();
+
+        WebDriverWait wait = new WebDriverWait(driver, 10);
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("content")));
+        driver.switchTo().frame("content");
+
+        WebElement scroll = driver.findElement(By.id("row0"));
+        List<WebElement> columns = scroll.findElements(By.tagName("td"));
+
+        for (WebElement column : columns) {
+            innerHTML.add(column.getAttribute("outerHTML").trim());
+        }
+
+        driver.switchTo().defaultContent();
+
+        return innerHTML;
+    }
+
+    public static String getContentSource(WebDriver driver, String frame) {
+        WebDriverWait wait = new WebDriverWait(driver, 10);
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id(frame)));
+        driver.switchTo().frame(frame);
+
+        String source = driver.getPageSource();
+
+        driver.switchTo().defaultContent();
+        return source;
+    }
+
+    public static void wait(WebDriver driver, int milliseconds) {
+        driver.manage().timeouts().implicitlyWait(milliseconds, TimeUnit.MILLISECONDS);
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public static TestResultSet getResultSet(String resultSet, String referenceID) {

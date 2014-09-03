@@ -16,6 +16,7 @@ public class TestCase {
     private String elementFrame;
     private String inputValue;
     private String expectedOutputValue;
+    private String involvedFrames;
 
     public TestCase() {
 
@@ -62,7 +63,11 @@ public class TestCase {
     }
 
     public TestResult evaluate(WebDriver driver) {
+        PageStateCapture initialState = new PageStateCapture(elementFrame);
+        initialState.capturePage(driver);
+
         TestResult testResult = new TestResult();
+        testResult.setInitialState(initialState);
 
         WebDriverWait wait = new WebDriverWait(driver, 10);
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id(elementFrame)));
@@ -80,9 +85,14 @@ public class TestCase {
 
         driver.switchTo().defaultContent();
 
+        PageStateCapture finalState = new PageStateCapture(elementFrame);
+        testResult.setFinalState(finalState);
+
+        finalState.capturePage(driver);
+        testResult.setChangedElements(initialState.compare(finalState));
+
         return testResult;
     }
-
 
     private String testSelectCase(WebDriver driver, String value) {
         WebDriverWait wait = new WebDriverWait(driver, 10);

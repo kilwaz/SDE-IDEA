@@ -27,14 +27,12 @@ public class DataBank {
         return nameList;
     }
 
-//    static public void renameProgram(Program program, String name) {
-//        programs.remove(program.getName());
-//        program.setName(name);
-//        programs.put(name, program);
-//    }
-
     public static Program getProgramById(Integer id) {
         return programs.get(id);
+    }
+
+    private static void removeProgram(Program program) {
+        programs.remove(program.getId());
     }
 
     private static void addProgram(Program program) {
@@ -126,6 +124,51 @@ public class DataBank {
             e.printStackTrace();
         }
         return newProgram;
+    }
+
+    public static void deleteProgram(Program program) {
+        removeProgram(program);
+
+        try {
+            if (mySQLInstance == null) {
+                mySQLInstance = MySQLConnectionManager.getInstance();
+            }
+
+            // Delete all nodes associated with program
+            PreparedStatement preparedStatement = mySQLInstance.getPreparedStatement("delete from node where program_id = ?");
+            if (preparedStatement != null) {
+                preparedStatement.setInt(1, program.getId());
+                preparedStatement.executeUpdate();
+                preparedStatement.close();
+            }
+
+            // Delete program record
+            preparedStatement = mySQLInstance.getPreparedStatement("delete from program where id = ?");
+            if (preparedStatement != null) {
+                preparedStatement.setInt(1, program.getId());
+                preparedStatement.executeUpdate();
+                preparedStatement.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void deleteNode(DrawableNode node) {
+        try {
+            if (mySQLInstance == null) {
+                mySQLInstance = MySQLConnectionManager.getInstance();
+            }
+
+            PreparedStatement preparedStatement = mySQLInstance.getPreparedStatement("delete from node where id = ?");
+            if (preparedStatement != null) {
+                preparedStatement.setInt(1, node.getId());
+                preparedStatement.executeUpdate();
+                preparedStatement.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void saveNode(DrawableNode node) {

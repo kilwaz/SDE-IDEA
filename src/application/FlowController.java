@@ -41,6 +41,20 @@ public class FlowController {
         nodes.add(drawableNode);
     }
 
+    public void removeNode(DrawableNode drawableNode) {
+        nodes.remove(drawableNode);
+        ArrayList<NodeConnection> connectionsToRemove = new ArrayList<NodeConnection>();
+        for (NodeConnection connection : connections) {
+            if (connection.getConnectionStart() == drawableNode || connection.getConnectionEnd() == drawableNode) {
+                connectionsToRemove.add(connection);
+            }
+        }
+
+        for (NodeConnection connection : connectionsToRemove) {
+            connections.remove(connection);
+        }
+    }
+
     public void addConnection(NodeConnection connection) {
         connections.add(connection);
     }

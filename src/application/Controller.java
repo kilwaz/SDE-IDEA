@@ -199,6 +199,9 @@ public class Controller implements Initializable {
                             Program program = DataBank.currentlyEditProgram;
                             DrawableNode removedNode = program.getFlowController().getNodeById(Integer.parseInt(((MenuItem) event.getSource()).getId().replace("RemoveNode-", "")));
 
+                            program.getFlowController().removeNode(removedNode);
+                            DataBank.deleteNode(removedNode);
+
                             canvasController.drawProgram(program);
 
                             Tab tabToRemove = null;
@@ -260,14 +263,29 @@ public class Controller implements Initializable {
                     }
                 });
 
+                MenuItem menuItemDeleteProgram = new MenuItem("Delete Program");
+                menuItemDeleteProgram.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        Program program = DataBank.currentlyEditProgram;
+
+                        org.controlsfx.control.action.Action action = Dialogs.create()
+                                .owner(null)
+                                .title("Deleting program")
+                                .message("Are you sure you want to delete " + program.getName()).showConfirm();
+                        if ("YES".equals(action.toString())) {
+                            DataBank.deleteProgram(program);
+                            programList.getItems().remove(program);
+                        }
+                    }
+                });
+
                 MenuItem menuItemCompile = new MenuItem("Compile...");
                 menuItemCompile.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent event) {
                         Program program = DataBank.currentlyEditProgram;
                         program.compile();
-//                        FlowNode flowNode = program.getFlowController().getNodeByName(compileButton.getId().replace("compileButton-", ""));
-//                        flowNode.getSource().compile();
                     }
                 });
 
@@ -277,8 +295,6 @@ public class Controller implements Initializable {
                     public void handle(ActionEvent event) {
                         Program program = DataBank.currentlyEditProgram;
                         program.run();
-//                        FlowNode flowNode = program.getFlowController().getNodeByName(runButton.getId().replace("runButton-", ""));
-//                        flowNode.getSource().run();
                     }
                 });
 
@@ -288,6 +304,7 @@ public class Controller implements Initializable {
                     contextMenu.getItems().add(menuItemNewProgram);
                 } else {
                     contextMenu.getItems().add(menuItemNewProgram);
+                    contextMenu.getItems().add(menuItemDeleteProgram);
                     contextMenu.getItems().add(menuItemCompile);
                     contextMenu.getItems().add(menuItemRun);
                 }
@@ -392,6 +409,7 @@ public class Controller implements Initializable {
                     Program program = DataBank.currentlyEditProgram;
                     DrawableNode nodeToUpdate = program.getFlowController().getNodeById(Integer.parseInt(nameField.getId().replace("fieldName-", "")));
                     nodeToUpdate.setContainedText(nameField.getText());
+                    program.getFlowController().checkConnections(); // Renaming a node might make or break connections
 
                     for (Tab loopTab : tabPaneSource.getTabs()) {
                         if (loopTab.getId() != null) {

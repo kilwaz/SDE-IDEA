@@ -1,6 +1,7 @@
 package application.tester;
 
 import application.DrawableNode;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
@@ -17,14 +18,19 @@ public class TestResultSet extends DrawableNode {
     }
 
     public void addResult(TestResult testResult) {
-        resultList.add(testResult);
-//        TableView<TestResult> tableView = (TableView<TestResult>) Controller.getInstance().getElementById("resultsTable-" + getId());
-//        if (tableView != null) {
-//            System.out.println("FOUND!");
-//            tableView.setItems(resultList);
-//        } else {
-//            System.out.println("DID NOT FIND!");
-//        }
+        class OneShotTask implements Runnable {
+            private TestResult testResult;
+
+            OneShotTask(TestResult testResult) {
+                this.testResult = testResult;
+            }
+
+            public void run() {
+                resultList.add(testResult);
+            }
+        }
+
+        Platform.runLater(new OneShotTask(testResult));
     }
 
     public ObservableList<TestResult> getResultList() {

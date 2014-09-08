@@ -1,6 +1,9 @@
 package application;
 
-import application.utils.*;
+import application.utils.BrowserManager;
+import application.utils.DataBank;
+import application.utils.SSHConnectionManager;
+import application.utils.ThreadManager;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -21,16 +24,16 @@ public class Main extends Application {
 
         DataBank.loadFromDatabase();
 
-        RemoteDebug remoteDebug = new RemoteDebug("172.16.10.212", "8787");
-        Thread t = new Thread(remoteDebug);
-        t.start();
+        //RemoteDebug remoteDebug = new RemoteDebug("172.16.10.212", "8787");
+        //Thread t = new Thread(remoteDebug);
+        //t.start();
 
-        Thread.sleep(200);
+        //Thread.sleep(200);
 
 //        remoteDebug.setBreakPoint("com.spl.focal.appContext.app.ajaxActions.PerfRatingChangedAction", "fullFieldName", 136);
 //        remoteDebug.setBreakPoint("com.spl.focal.appContext.app.ajaxActions.PerfRatingChangedAction", "currencyCd", 145);
 //        remoteDebug.setBreakPoint("com.spl.focal.appContext.app.ajaxActions.PerfRatingChangedAction", "roleSeqId", 142);
-        remoteDebug.setBreakPoint("com.spl.focal.appContext.app.ajaxActions.PerfRatingChangedAction", "displayCurrency", 146);
+        //remoteDebug.setBreakPoint("com.spl.focal.appContext.app.ajaxActions.PerfRatingChangedAction", "displayCurrency", 146);
 
         // Removes any class or java files previously compiled.
         String userHome = System.getProperty("user.home");

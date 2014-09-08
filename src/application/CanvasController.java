@@ -41,7 +41,7 @@ public class CanvasController {
         if (event.isPrimaryButtonDown() && draggedNode != null) {
             draggedNode.setX(event.getX() + dragXOffset);
             draggedNode.setY(event.getY() + dragYOffset);
-            drawProgram(DataBank.currentlyEditProgram);
+            drawProgram();
             isDraggingNode = true;
         }
     }
@@ -64,7 +64,7 @@ public class CanvasController {
             DataBank.saveNode(draggedNode);
             draggedNode = null;
             isDraggingNode = false;
-            drawProgram(DataBank.currentlyEditProgram);
+            drawProgram();
             return true;
         } else {
             return false;
@@ -78,7 +78,9 @@ public class CanvasController {
 //        }
     }
 
-    public void drawProgram(Program program) {
+    public void drawProgram() {
+        Program program = DataBank.currentlyEditProgram;
+
         setFlowNodeScale(program.getFlowController().getStartNode(), this.scale);
         gc.clearRect(0, 0, canvasFlow.getWidth(), canvasFlow.getHeight()); // Clears the screen
 

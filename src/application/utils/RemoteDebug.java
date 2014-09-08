@@ -50,16 +50,10 @@ public class RemoteDebug implements Runnable {
     }
 
     public void setBreakPoint(String className, String variableName, int lineNumber) {
-        //List<ReferenceType> classList = vm.classesByName("com.spl.focal.appContext.app.ajaxActions.PerfRatingChangedAction");
-
         breakPoints.add(new BreakPoint(className, variableName, lineNumber));
 
         try {
             List<ReferenceType> classList = vm.classesByName(className);
-//            EventRequestManager eventRequestManager = vm.eventRequestManager();
-//            MethodEntryRequest methodEntryRequest = eventRequestManager.createMethodEntryRequest();
-//            methodEntryRequest.addClassFilter(classList.get(0));
-
             Location breakpointLocation = null;
             for (ReferenceType refType : classList) {
                 if (breakpointLocation != null) {
@@ -103,7 +97,7 @@ public class RemoteDebug implements Runnable {
                 vm = attachingConnector.attach(prm);
                 EventQueue evtQueue = vm.eventQueue();
                 while (true) {
-                    EventSet evtSet = evtQueue.remove();
+                    EventSet evtSet = evtQueue.remove(); // Code pauses here..
                     EventIterator evtIter = evtSet.eventIterator();
                     while (evtIter.hasNext()) {
                         try {
@@ -114,7 +108,6 @@ public class RemoteDebug implements Runnable {
                                 BreakpointEvent brEvt = (BreakpointEvent) evt;
                                 ThreadReference threadRef = brEvt.thread();
                                 StackFrame stackFrame = threadRef.frame(0);
-
 
                                 List<LocalVariable> visVars = stackFrame.visibleVariables();
                                 for (LocalVariable visibleVar : visVars) {

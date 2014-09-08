@@ -45,6 +45,18 @@ public class Controller implements Initializable {
     private AnchorPane leftAccordionAnchorPane;
 
     @FXML
+    private AnchorPane lowerMainSplitPane;
+
+    @FXML
+    private AnchorPane sourceTabAnchorPane;
+
+    @FXML
+    private AnchorPane rightContextAnchorPane;
+
+    @FXML
+    private AnchorPane canvasAnchorPane;
+
+    @FXML
     private TitledPane programTitlePane;
 
     @FXML
@@ -76,6 +88,10 @@ public class Controller implements Initializable {
 
         assert programAccordion != null : "fx:id=\"programAccordion\" was not injected: check your FXML file 'ApplicationScene.fxml'.";
         assert leftAccordionAnchorPane != null : "fx:id=\"leftAccordionAnchorPane\" was not injected: check your FXML file 'ApplicationScene.fxml'.";
+        assert lowerMainSplitPane != null : "fx:id=\"lowerMainSplitPane\" was not injected: check your FXML file 'ApplicationScene.fxml'.";
+        assert sourceTabAnchorPane != null : "fx:id=\"lowerMainSplitPane\" was not injected: check your FXML file 'ApplicationScene.fxml'.";
+        assert rightContextAnchorPane != null : "fx:id=\"lowerMainSplitPane\" was not injected: check your FXML file 'ApplicationScene.fxml'.";
+        assert canvasAnchorPane != null : "fx:id=\"lowerMainSplitPane\" was not injected: check your FXML file 'ApplicationScene.fxml'.";
 
         assert programTitlePane != null : "fx:id=\"programTitlePane\" was not injected: check your FXML file 'ApplicationScene.fxml'.";
         assert leftAccordion != null : "fx:id=\"leftAccordion\" was not injected: check your FXML file 'ApplicationScene.fxml'.";
@@ -88,7 +104,6 @@ public class Controller implements Initializable {
 
         assert tabPaneSource != null : "fx:id=\"tabPaneSource\" was not injected: check your FXML file 'ApplicationScene.fxml'.";
 
-        SplitPane.setResizableWithParent(leftAccordionAnchorPane, Boolean.FALSE);
         canvasController = new CanvasController(canvasFlow);
 
         canvasFlow.setOnMouseDragged(new EventHandler<MouseEvent>() {
@@ -116,7 +131,7 @@ public class Controller implements Initializable {
             @Override
             public void handle(ScrollEvent event) {
                 canvasController.setScale(canvasController.getScale() + event.getDeltaY() / 400);
-                canvasController.drawProgram(DataBank.currentlyEditProgram);
+                canvasController.drawProgram();
             }
         });
 
@@ -159,7 +174,7 @@ public class Controller implements Initializable {
                             FlowNode newFlowNode = new FlowNode(clickedNode.getX() + 90, clickedNode.getY(), new BigInteger(40, random).toString(32));
                             program.getFlowController().addNode(newFlowNode);
                             DataBank.saveNode(newFlowNode); // We need to save the node after creating it to assign the ID correctly
-                            canvasController.drawProgram(program);
+                            canvasController.drawProgram();
                         }
                     });
                     menuItemFlowAddNode.setId("AddNode-" + drawableNode.getId());
@@ -175,7 +190,7 @@ public class Controller implements Initializable {
                             TestResultSet newResultSet = new TestResultSet(clickedNode.getX() + 90, clickedNode.getY(), new BigInteger(40, random).toString(32));
                             program.getFlowController().addNode(newResultSet);
                             DataBank.saveNode(newResultSet); // We need to save the node after creating it to assign the ID correctly
-                            canvasController.drawProgram(program);
+                            canvasController.drawProgram();
                         }
                     });
                     menuItemFlowAddResultSet.setId("ResultNode-" + drawableNode.getId());
@@ -202,7 +217,7 @@ public class Controller implements Initializable {
                             program.getFlowController().removeNode(removedNode);
                             DataBank.deleteNode(removedNode);
 
-                            canvasController.drawProgram(program);
+                            canvasController.drawProgram();
 
                             Tab tabToRemove = null;
                             for (Tab loopTab : tabPaneSource.getTabs()) {
@@ -321,7 +336,7 @@ public class Controller implements Initializable {
                     public void changed(ObservableValue<? extends Program> ov, Program oldProgram, Program newProgram) {
                         DataBank.currentlyEditProgram = newProgram;
                         newProgram.getFlowController().checkConnections();
-                        canvasController.drawProgram(newProgram);
+                        canvasController.drawProgram();
                     }
                 });
 
@@ -382,6 +397,21 @@ public class Controller implements Initializable {
         resultsTable.setLayoutX(11);
         resultsTable.setLayoutY(50);
 
+        resultsTable.setMaxHeight(Integer.MAX_VALUE);
+        resultsTable.setMaxWidth(Integer.MAX_VALUE);
+        AnchorPane.setBottomAnchor(resultsTable, 0.0);
+        AnchorPane.setLeftAnchor(resultsTable, 11.0);
+        AnchorPane.setRightAnchor(resultsTable, 0.0);
+        AnchorPane.setTopAnchor(resultsTable, 50.0);
+        resultsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        tabAnchorPane.setMaxHeight(Integer.MAX_VALUE);
+        tabAnchorPane.setMaxWidth(Integer.MAX_VALUE);
+        AnchorPane.setBottomAnchor(tabAnchorPane, 0.0);
+        AnchorPane.setLeftAnchor(tabAnchorPane, 0.0);
+        AnchorPane.setRightAnchor(tabAnchorPane, 0.0);
+        AnchorPane.setTopAnchor(tabAnchorPane, 0.0);
+
         tabAnchorPane.getChildren().add(createNodeNameField(testResultSet));
         tabAnchorPane.getChildren().add(createNodeNameLabel());
         tabAnchorPane.getChildren().add(resultsTable);
@@ -421,7 +451,7 @@ public class Controller implements Initializable {
 
                     DataBank.saveNode(nodeToUpdate);
 
-                    canvasController.drawProgram(program);
+                    canvasController.drawProgram();
                 }
             }
         });
@@ -472,6 +502,18 @@ public class Controller implements Initializable {
         tabTextArea.setLayoutY(50);
         tabTextArea.setId("textArea-" + flowNode.getId());
 
+        AnchorPane.setBottomAnchor(tabTextArea, 0.0);
+        AnchorPane.setLeftAnchor(tabTextArea, 11.0);
+        AnchorPane.setRightAnchor(tabTextArea, 0.0);
+        AnchorPane.setTopAnchor(tabTextArea, 50.0);
+
+        tabAnchorPane.setMaxHeight(Integer.MAX_VALUE);
+        tabAnchorPane.setMaxWidth(Integer.MAX_VALUE);
+        AnchorPane.setBottomAnchor(tabAnchorPane, 0.0);
+        AnchorPane.setLeftAnchor(tabAnchorPane, 0.0);
+        AnchorPane.setRightAnchor(tabAnchorPane, 0.0);
+        AnchorPane.setTopAnchor(tabAnchorPane, 0.0);
+
         // Setup the text area
         SwingUtilities.invokeLater(tabTextArea);
         tabAnchorPane.getChildren().add(tabTextArea);
@@ -509,7 +551,7 @@ public class Controller implements Initializable {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                canvasController.drawProgram(DataBank.currentlyEditProgram);
+                canvasController.drawProgram();
             }
         });
     }

@@ -161,41 +161,41 @@ public class Controller implements Initializable {
                 Program program = DataBank.currentlyEditProgram;
 
                 List<DrawableNode> clickNodes = program.getFlowController().getClickedNodes(event.getX(), event.getY());
+
+                MenuItem menuItemFlowAddNode = new MenuItem("Add Node");
+                menuItemFlowAddNode.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        Program program = DataBank.currentlyEditProgram;
+
+                        SecureRandom random = new SecureRandom();
+                        FlowNode newFlowNode = new FlowNode(0.0, 0.0, new BigInteger(40, random).toString(32));
+                        program.getFlowController().addNode(newFlowNode);
+                        DataBank.saveNode(newFlowNode); // We need to save the node after creating it to assign the ID correctly
+                        canvasController.drawProgram();
+                    }
+                });
+                menuItemFlowAddNode.setId("AddNode-");
+
+                MenuItem menuItemFlowAddResultSet = new MenuItem("Add Result Node");
+                menuItemFlowAddResultSet.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        Program program = DataBank.currentlyEditProgram;
+
+                        SecureRandom random = new SecureRandom();
+                        TestResultSet newResultSet = new TestResultSet(0.0, 0.0, new BigInteger(40, random).toString(32));
+                        program.getFlowController().addNode(newResultSet);
+                        DataBank.saveNode(newResultSet); // We need to save the node after creating it to assign the ID correctly
+                        canvasController.drawProgram();
+                    }
+                });
+                menuItemFlowAddResultSet.setId("ResultNode-");
+
+                MenuItem menuItemFlowStartNode = new MenuItem("Set Start Node");
+                MenuItem menuItemFlowRemoveNode = new MenuItem("Remove Node");
                 if (clickNodes.size() > 0) {
                     DrawableNode drawableNode = clickNodes.get(0);
-                    MenuItem menuItemFlowAddNode = new MenuItem("Add Node");
-                    menuItemFlowAddNode.setOnAction(new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(ActionEvent event) {
-                            Program program = DataBank.currentlyEditProgram;
-                            DrawableNode clickedNode = program.getFlowController().getNodeById(Integer.parseInt(((MenuItem) event.getSource()).getId().replace("AddNode-", "")));
-
-                            SecureRandom random = new SecureRandom();
-                            FlowNode newFlowNode = new FlowNode(clickedNode.getX() + 90, clickedNode.getY(), new BigInteger(40, random).toString(32));
-                            program.getFlowController().addNode(newFlowNode);
-                            DataBank.saveNode(newFlowNode); // We need to save the node after creating it to assign the ID correctly
-                            canvasController.drawProgram();
-                        }
-                    });
-                    menuItemFlowAddNode.setId("AddNode-" + drawableNode.getId());
-
-                    MenuItem menuItemFlowAddResultSet = new MenuItem("Add Result Node");
-                    menuItemFlowAddResultSet.setOnAction(new EventHandler<ActionEvent>() {
-                        @Override
-                        public void handle(ActionEvent event) {
-                            Program program = DataBank.currentlyEditProgram;
-                            DrawableNode clickedNode = program.getFlowController().getNodeById(Integer.parseInt(((MenuItem) event.getSource()).getId().replace("ResultNode-", "")));
-
-                            SecureRandom random = new SecureRandom();
-                            TestResultSet newResultSet = new TestResultSet(clickedNode.getX() + 90, clickedNode.getY(), new BigInteger(40, random).toString(32));
-                            program.getFlowController().addNode(newResultSet);
-                            DataBank.saveNode(newResultSet); // We need to save the node after creating it to assign the ID correctly
-                            canvasController.drawProgram();
-                        }
-                    });
-                    menuItemFlowAddResultSet.setId("ResultNode-" + drawableNode.getId());
-
-                    MenuItem menuItemFlowStartNode = new MenuItem("Set Start Node");
                     menuItemFlowStartNode.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent event) {
@@ -207,7 +207,6 @@ public class Controller implements Initializable {
                     });
                     menuItemFlowStartNode.setId("StartNode-" + drawableNode.getId());
 
-                    MenuItem menuItemFlowRemoveNode = new MenuItem("Remove Node");
                     menuItemFlowRemoveNode.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent event) {
@@ -239,14 +238,17 @@ public class Controller implements Initializable {
                         }
                     });
                     menuItemFlowRemoveNode.setId("RemoveNode-" + drawableNode.getId());
+                }
 
-                    ContextMenu contextMenu = new ContextMenu();
-                    contextMenu.getItems().add(menuItemFlowAddNode);
-                    contextMenu.getItems().add(menuItemFlowAddResultSet);
+                ContextMenu contextMenu = new ContextMenu();
+                contextMenu.getItems().add(menuItemFlowAddNode);
+                contextMenu.getItems().add(menuItemFlowAddResultSet);
+                if (clickNodes.size() > 0) {
                     contextMenu.getItems().add(menuItemFlowRemoveNode);
                     contextMenu.getItems().add(menuItemFlowStartNode);
-                    contextMenu.show(canvasFlow, event.getScreenX(), event.getScreenY());
                 }
+
+                contextMenu.show(canvasFlow, event.getScreenX(), event.getScreenY());
             }
         });
 

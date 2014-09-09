@@ -29,6 +29,8 @@ public class ChangedElement {
             }
         } else if ("text".equals(changeType)) {
             System.out.println(initialElement.attr("id") + " has text changed '" + initialElement.text() + "' -> '" + initialElement.text() + "'");
+        } else if ("newElement".equals(changeType)) {
+            System.out.println("New element added -> " + initialElement.outerHtml());
         }
     }
 }

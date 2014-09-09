@@ -48,7 +48,7 @@ public class SwingTextArea extends SwingNode implements Runnable {
     public void run() {
         JPanel cp = new JPanel(new java.awt.BorderLayout());
 
-        sourceCodeTextArea = new RSyntaxTextArea(18, 90);
+        sourceCodeTextArea = new RSyntaxTextArea(1, 1);
         sourceCodeTextArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
         sourceCodeTextArea.setCodeFoldingEnabled(true);
         sourceCodeTextArea.setAntiAliasingEnabled(true);

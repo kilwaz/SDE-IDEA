@@ -21,6 +21,7 @@ public class PageStateCapture {
     private HashMap<String, String> selectValues = new HashMap<String, String>();
     private Document doc;
     private Elements allElements;
+    private HashMap<String, Element> allElementsMap = new HashMap<String, Element>();
 
     public PageStateCapture(String elementFrame) {
         this.elementFrame = elementFrame;
@@ -34,10 +35,16 @@ public class PageStateCapture {
         return this.allElements;
     }
 
+    public HashMap<String, Element> getAllElementsMap() {
+        return this.allElementsMap;
+    }
+
     public void capturePage(WebDriver driver) {
-        WebDriverWait wait = new WebDriverWait(driver, 10);
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id(elementFrame)));
-        driver.switchTo().frame(elementFrame);
+        if (!"default".equals(elementFrame)) {
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.id(elementFrame)));
+            driver.switchTo().frame(elementFrame);
+        }
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
 
@@ -52,7 +59,19 @@ public class PageStateCapture {
             }
         }
 
-        driver.switchTo().defaultContent();
+        for (Element element : allElements) {
+            StringBuilder mapString = new StringBuilder();
+            Element loopElement = element;
+            while (loopElement != null) {
+                mapString.insert(0, loopElement.tagName() + loopElement.elementSiblingIndex());
+                loopElement = loopElement.parent();
+            }
+            allElementsMap.put(mapString.toString(), element);
+        }
+
+        if (!"default".equals(elementFrame)) {
+            driver.switchTo().defaultContent();
+        }
     }
 
     public ChangedElements compare(PageStateCapture pageStateCapture) {
@@ -63,13 +82,14 @@ public class PageStateCapture {
         List<Element> textElementChangesFinal = new ArrayList<Element>();
         List<Element> textElementChangesFinal2 = new ArrayList<Element>();
 
-        Elements compareAllElements = pageStateCapture.getAllElements();
+        HashMap<String, Element> compareAllElementsMap = pageStateCapture.getAllElementsMap();
         HashMap<String, String> compareSelectValues = pageStateCapture.getSelectValues();
 
-        for (int n = 0; n < allElements.size(); n++) {
-            if (allElements.size() > n && compareAllElements.size() > n) {
-                Element tag = allElements.get(n);
-                Element tag2 = compareAllElements.get(n);
+        for (String reference : allElementsMap.keySet()) {
+            if (compareAllElementsMap.containsKey(reference)) {
+                Element tag = allElementsMap.get(reference);
+
+                Element tag2 = compareAllElementsMap.get(reference);
                 String output = "<" + tag.tagName() + " " + tag.attributes().toString() + "></" + tag.tagName() + ">";
                 String output2 = "<" + tag2.tagName() + " " + tag2.attributes().toString() + "></" + tag2.tagName() + ">";
                 if ("select".equals(tag.tagName())) {
@@ -82,9 +102,11 @@ public class PageStateCapture {
                 }
 
                 if (!output.equals(output2)) {
-                    for (Attribute att : tag.attributes()) {
-                        if (!att.getValue().equals(tag2.attr(att.getKey()))) {
-                            changedElements.addElement(new ChangedElement(tag, att.getValue(), tag2, tag2.attr(att.getKey()), "attribute"));
+                    if (tag.tagName().equals(tag2.tagName())) {
+                        for (Attribute att : tag.attributes()) {
+                            if (!att.getValue().equals(tag2.attr(att.getKey()))) {
+                                changedElements.addElement(new ChangedElement(tag, att.getValue(), tag2, tag2.attr(att.getKey()), "attribute"));
+                            }
                         }
                     }
                 }
@@ -93,9 +115,13 @@ public class PageStateCapture {
                     textElementChanges.add(tag);
                     textElementChanges2.add(tag2);
                 }
+            } else {
+                Element tag = allElementsMap.get(reference);
+                changedElements.addElement(new ChangedElement(tag, tag.html(), null, null, "newElement"));
             }
         }
 
+        // Because calling text returns all elements below as well we only want the lowest level node that has changed.
         textElementChangesFinal.addAll(textElementChanges);
         textElementChangesFinal2.addAll(textElementChanges2);
         for (Element element : textElementChanges) {
@@ -108,6 +134,7 @@ public class PageStateCapture {
             }
         }
 
+        // We need to do the same for both lists
         for (Element element : textElementChanges2) {
             Element parent = element.parent();
             while (parent != null) {
@@ -118,6 +145,7 @@ public class PageStateCapture {
             }
         }
 
+        // Once we have found the ones that have really changed we can save only those.
         for (int i = 0; i < textElementChangesFinal.size(); i++) {
             changedElements.addElement(new ChangedElement(textElementChangesFinal.get(i), textElementChangesFinal.get(i).text(), textElementChangesFinal.get(i), textElementChangesFinal2.get(i).text(), "text"));
         }

@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class TestHelper {
-    public static TestCase createSelectTestCase(String elementId, String elementFrame, String inputValue, String expectedOutputValue) {
+    public static TestCase createTestCase(String elementId, String elementFrame, String inputValue, String expectedOutputValue, String testType) {
         TestCase testCase = new TestCase();
 
-        testCase.setElementType("select");
+        testCase.setElementType(testType);
         testCase.setElementFrame(elementFrame);
         testCase.setElementId(elementId);
         testCase.setExpectedOutputValue(expectedOutputValue);

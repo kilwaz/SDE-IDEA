@@ -69,9 +69,11 @@ public class TestCase {
         TestResult testResult = new TestResult();
         testResult.setInitialState(initialState);
 
-        WebDriverWait wait = new WebDriverWait(driver, 10);
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id(elementFrame)));
-        driver.switchTo().frame(elementFrame);
+        if (!"default".equals(elementFrame)) {
+            WebDriverWait wait = new WebDriverWait(driver, 10);
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.id(elementFrame)));
+            driver.switchTo().frame(elementFrame);
+        }
 
         if ("select".equals(elementType)) {
             Select select = new Select(driver.findElement(By.id(elementId)));
@@ -81,9 +83,16 @@ public class TestCase {
             Timer timer = new Timer();
             testResult.setOutcome(testSelectCase(driver, select.getFirstSelectedOption().getAttribute("value")));
             testResult.setDuration(timer.getDuration());
+        } else if ("link".equals(elementType)) {
+            testResult.setExpected(expectedOutputValue);
+            Timer timer = new Timer();
+            testResult.setOutcome(testLinkCase(driver));
+            testResult.setDuration(timer.getDuration());
         }
 
-        driver.switchTo().defaultContent();
+        if (!"default".equals(elementFrame)) {
+            driver.switchTo().defaultContent();
+        }
 
         PageStateCapture finalState = new PageStateCapture(elementFrame);
         testResult.setFinalState(finalState);
@@ -92,6 +101,17 @@ public class TestCase {
         testResult.setChangedElements(initialState.compare(finalState));
 
         return testResult;
+    }
+
+    private String testLinkCase(WebDriver driver) {
+        WebElement linkElement = driver.findElement(By.xpath(elementId));
+
+        if (linkElement != null) {
+            linkElement.click();
+            return "SUCCESS";
+        }
+
+        return "FAIL";
     }
 
     private String testSelectCase(WebDriver driver, String value) {

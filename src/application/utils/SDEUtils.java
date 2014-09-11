@@ -3,9 +3,9 @@ package application.utils;
 import application.net.SSHManager;
 import com.jcraft.jsch.JSch;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class SDEUtils {
     static {
@@ -39,21 +39,6 @@ public class SDEUtils {
         return instance;
     }
 
-    public static void scpTo() {
-        System.out.println("SCP");
-        String userName = "spiralinks";
-        String password = "C0deFreeze09";
-        String connectionIP = "172.16.10.212";
-        SSHManager instance = new SSHManager(userName, password, connectionIP, knownHosts, 22);
-        String errorMessage = instance.connect();
-
-        if (errorMessage != null) {
-            System.out.println("ERROR " + errorMessage);
-        }
-
-        instance.scpTo("/opt/jboss/jboss-4.2.2.GA/server/spl-8080/deploy/focal-v3-rbs2010.ear", "C:\\jboss-4.2.1.GA\\server\\default\\deploy\\focal-v3-rbs2010.ear");
-    }
-
     public static void editFileReplaceText(SSHManager sshManager, String find, String replace, String fileLocation) {
         find = find.replace("/", "\\/");
         replace = replace.replace("/", "\\/");
@@ -80,6 +65,58 @@ public class SDEUtils {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void svnCheckout(String branch, String targetDirectory) {
+        //https://ibis.spl.com/svn/focal-v4/branches/spl-demo-v6/
+        runCMDCommand("svn checkout " + branch + " " + targetDirectory);
+    }
+
+    public static void buildApplication(String projectLocation, String project, String outputDirectory) {
+        try {
+            String path = "C:" + File.separator + "hello" + File.separator + "hi.txt";
+            path = projectLocation + File.separator +
+                    "focal-v6-app" + File.separator +
+                    "src" + File.separator +
+                    "main" + File.separator +
+                    "resources" + File.separator +
+                    "server-config.properties";
+            //(use relative path for Unix systems)
+            File f = new File(path);
+            if (f.exists()) {
+                f.delete();
+            }
+            //(works for both Windows and Linux)
+            f.createNewFile();
+
+            PrintWriter fileOut = new PrintWriter(f);
+            fileOut.println("JBOSS-OUTPUT-DIR=" + outputDirectory);
+            fileOut.println("client-name=" + project);
+            fileOut.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        runCMDCommand("cd " + projectLocation + "\\app-builder & mvn -Dclient-name=" + project + " clean package");
+    }
+
+    public static void takeDatabaseDump(SSHManager sshManager, String user, String password, String schema, String databaseType, Boolean zipFile) {
+        String command = "";
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMMdd_HHmmss");
+        String dateFormat = sdf.format(new Date());
+        String fileName = "";
+        if ("ORACLE".equals(databaseType)) {
+            fileName = dateFormat + "_" + user;
+            command = "expdp " + user + "/" + password + " schemas=" + schema + " directory=dmptmp dumpfile=" + fileName + ".dmp logfile=" + fileName + ".log";
+        }
+        if (!"".equals(command)) {
+            sshManager.sendShellCommand(command);
+            if (zipFile) {
+                sshManager.sendShellCommand("gzip -9 " + fileName + ".dmp");
+            }
         }
     }
 }

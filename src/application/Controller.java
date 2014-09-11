@@ -349,7 +349,7 @@ public class Controller implements Initializable {
                     String consoleText = console.getText();
                     String commandText = consoleText.substring(consoleText.lastIndexOf("$") + 1, consoleText.length());
                     System.out.println("Sending -> " + commandText);
-                    SSHManager sshManager = (SSHManager) DataBank.loadVariable("ssh", "s1");
+                    SSHManager sshManager = (SSHManager) DataBank.loadVariable("ssh", "27");
                     sshManager.sendShellCommand(commandText);
                 }
             }

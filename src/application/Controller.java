@@ -21,6 +21,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import org.controlsfx.dialog.Dialogs;
 
 import javax.swing.*;
@@ -68,6 +69,9 @@ public class Controller implements Initializable {
     private MenuItem menuContextNewProgram;
 
     @FXML
+    private MenuItem menuBarMenuItemQuit;
+
+    @FXML
     private SplitPane splitPanePageCentral;
 
     @FXML
@@ -105,6 +109,8 @@ public class Controller implements Initializable {
         assert canvasFlow != null : "fx:id=\"canvasFlow\" was not injected: check your FXML file 'ApplicationScene.fxml'.";
 
         assert tabPaneSource != null : "fx:id=\"tabPaneSource\" was not injected: check your FXML file 'ApplicationScene.fxml'.";
+
+        assert menuBarMenuItemQuit != null : "fx:id=\"menuBarMenuItemQuit\" was not injected: check your FXML file 'ApplicationScene.fxml'.";
 
         canvasController = new CanvasController(canvasFlow);
 
@@ -372,6 +378,13 @@ public class Controller implements Initializable {
                     SSHManager sshManager = (SSHManager) DataBank.loadVariable("ssh", "27");
                     sshManager.sendShellCommand(commandText);
                 }
+            }
+        });
+
+        menuBarMenuItemQuit.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                ((Stage) scene.getWindow()).close();
             }
         });
 

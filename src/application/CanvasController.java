@@ -2,6 +2,8 @@ package application;
 
 import application.tester.TestResultNode;
 import application.utils.DataBank;
+import com.sun.javafx.tk.FontMetrics;
+import com.sun.javafx.tk.Toolkit;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -23,6 +25,8 @@ public class CanvasController {
     private Double dragYOffset = 0.0;
     private Double scale = 1.0;
     private Double colourCounter = 0.0;
+    private Double nodeFontPadding = 15.0; // This is added onto the width of the font
+    private Double minimumNodeWidth = 50.0; // Node cannot have a smaller width than this
 
     public CanvasController(Canvas canvasFlow) {
         this.canvasFlow = canvasFlow;
@@ -111,6 +115,14 @@ public class CanvasController {
             gc.setFill(Color.WHITE);
         }
 
+        FontMetrics metrics = Toolkit.getToolkit().getFontLoader().getFontMetrics(gc.getFont());
+        Float fontWidth = metrics.computeStringWidth(drawableNode.getContainedText());
+        if (fontWidth.doubleValue() + nodeFontPadding > minimumNodeWidth) {
+            drawableNode.setWidth(fontWidth.doubleValue() + nodeFontPadding);
+        } else {
+            drawableNode.setWidth(minimumNodeWidth);
+        }
+
         gc.fillRect(drawableNode.getScaledX(), drawableNode.getScaledY(), drawableNode.getScaledWidth(), drawableNode.getScaledHeight());
         gc.strokeRect(drawableNode.getScaledX(), drawableNode.getScaledY(), drawableNode.getScaledWidth(), drawableNode.getScaledHeight());
 
@@ -147,11 +159,16 @@ public class CanvasController {
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(1);
 
-        Double nodePadding = (30 + (offset * 5)) * startNode.getScale();
+        Double startNodePadding = ((startNode.getScaledWidth() / 2) + 10) * startNode.getScale();
+        Double endNodePadding = ((endNode.getScaledWidth() / 2) + 10) * endNode.getScale();
 
-        gc.strokeLine(startNode.getScaledCenterX() + startNode.getScaledWidth() / 2, startNode.getScaledCenterY(), startNode.getScaledCenterX() + nodePadding, startNode.getScaledCenterY());
-        gc.strokeLine(startNode.getScaledCenterX() + nodePadding, startNode.getScaledCenterY(), startNode.getScaledCenterX() + nodePadding, endNode.getScaledCenterY());
-        gc.strokeLine(startNode.getScaledCenterX() + nodePadding, endNode.getScaledCenterY(), endNode.getScaledCenterX() - nodePadding, endNode.getScaledCenterY());
-        gc.strokeLine(endNode.getScaledCenterX() - nodePadding, endNode.getScaledCenterY(), endNode.getScaledCenterX() - endNode.getScaledWidth() / 2, endNode.getScaledCenterY());
+        // Center of start to just outside start
+        gc.strokeLine(startNode.getScaledCenterX() + startNode.getScaledWidth() / 2, startNode.getScaledCenterY(), startNode.getScaledCenterX() + startNodePadding - 1, startNode.getScaledCenterY());
+        // Outside start to corner inline with end
+        gc.strokeLine(startNode.getScaledCenterX() + startNodePadding, startNode.getScaledCenterY(), startNode.getScaledCenterX() + startNodePadding, endNode.getScaledCenterY());
+        // Corner to just outside end
+        gc.strokeLine(startNode.getScaledCenterX() + startNodePadding, endNode.getScaledCenterY(), endNode.getScaledCenterX() - endNodePadding, endNode.getScaledCenterY());
+        // Just outside end to center of end
+        gc.strokeLine(endNode.getScaledCenterX() - endNodePadding + 1, endNode.getScaledCenterY(), endNode.getScaledCenterX() - endNode.getScaledWidth() / 2, endNode.getScaledCenterY());
     }
 }

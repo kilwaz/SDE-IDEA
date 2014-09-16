@@ -52,8 +52,16 @@ public class DrawableNode {
         return this.width;
     }
 
+    public void setWidth(Double width) {
+        this.width = width;
+    }
+
     public Double getHeight() {
         return this.height;
+    }
+
+    public void setHeight(Double height) {
+        this.height = height;
     }
 
     public Double getScaledCenterX() {

@@ -55,11 +55,13 @@ public class CanvasController {
         if (event.isPrimaryButtonDown()) {
             Program program = DataBank.currentlyEditProgram;
 
-            List<DrawableNode> clickedNodes = program.getFlowController().getClickedNodes(event.getX(), event.getY());
-            if (clickedNodes.size() > 0) {
-                draggedNode = clickedNodes.get(0);
-                dragXOffset = draggedNode.getX() - event.getX();
-                dragYOffset = draggedNode.getY() - event.getY();
+            if (program != null) {
+                List<DrawableNode> clickedNodes = program.getFlowController().getClickedNodes(event.getX(), event.getY());
+                if (clickedNodes.size() > 0) {
+                    draggedNode = clickedNodes.get(0);
+                    dragXOffset = draggedNode.getX() - event.getX();
+                    dragYOffset = draggedNode.getY() - event.getY();
+                }
             }
         }
     }

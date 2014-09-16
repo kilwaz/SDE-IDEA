@@ -150,15 +150,17 @@ public class Controller implements Initializable {
                     skipCanvasClick = false;
                 } else {
                     Program program = DataBank.currentlyEditProgram;
-                    List<DrawableNode> clickNodes = program.getFlowController().getClickedNodes(event.getX(), event.getY());
-                    if (clickNodes.size() > 0) {
-                        DrawableNode drawableNode = clickNodes.get(0);
-                        if (drawableNode instanceof FlowNode) {
-                            createOrShowSourceTab((FlowNode) drawableNode);
-                        } else if (drawableNode instanceof TestResultNode) {
-                            createOrShowResultSetTab((TestResultNode) drawableNode);
-                        } else if (drawableNode instanceof SplitNode) {
-                            createOrShowSplitTab((SplitNode) drawableNode);
+                    if (program != null) {
+                        List<DrawableNode> clickNodes = program.getFlowController().getClickedNodes(event.getX(), event.getY());
+                        if (clickNodes.size() > 0) {
+                            DrawableNode drawableNode = clickNodes.get(0);
+                            if (drawableNode instanceof FlowNode) {
+                                createOrShowSourceTab((FlowNode) drawableNode);
+                            } else if (drawableNode instanceof TestResultNode) {
+                                createOrShowResultSetTab((TestResultNode) drawableNode);
+                            } else if (drawableNode instanceof SplitNode) {
+                                createOrShowSplitTab((SplitNode) drawableNode);
+                            }
                         }
                     }
                 }
@@ -169,112 +171,113 @@ public class Controller implements Initializable {
             @Override
             public void handle(ContextMenuEvent event) {
                 Program program = DataBank.currentlyEditProgram;
+                if (program != null) {
+                    List<DrawableNode> clickNodes = program.getFlowController().getClickedNodes(event.getX(), event.getY());
 
-                List<DrawableNode> clickNodes = program.getFlowController().getClickedNodes(event.getX(), event.getY());
-
-                MenuItem menuItemFlowAddNode = new MenuItem("Add Node");
-                menuItemFlowAddNode.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        Program program = DataBank.currentlyEditProgram;
-
-                        SecureRandom random = new SecureRandom();
-                        FlowNode newFlowNode = new FlowNode(0.0, 0.0, new BigInteger(40, random).toString(32));
-                        program.getFlowController().addNode(newFlowNode);
-                        DataBank.saveNode(newFlowNode); // We need to save the node after creating it to assign the ID correctly
-                        canvasController.drawProgram();
-                    }
-                });
-                menuItemFlowAddNode.setId("AddNode-");
-
-                MenuItem menuItemFlowAddResultSet = new MenuItem("Add Result Node");
-                menuItemFlowAddResultSet.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        Program program = DataBank.currentlyEditProgram;
-
-                        SecureRandom random = new SecureRandom();
-                        TestResultNode newResultSet = new TestResultNode(0.0, 0.0, new BigInteger(40, random).toString(32));
-                        program.getFlowController().addNode(newResultSet);
-                        DataBank.saveNode(newResultSet); // We need to save the node after creating it to assign the ID correctly
-                        canvasController.drawProgram();
-                    }
-                });
-                menuItemFlowAddResultSet.setId("ResultNode-");
-
-                MenuItem menuItemFlowSplitNode = new MenuItem("Add Split Node");
-                menuItemFlowSplitNode.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        Program program = DataBank.currentlyEditProgram;
-
-                        SecureRandom random = new SecureRandom();
-                        SplitNode newSplitNode = new SplitNode(0.0, 0.0, new BigInteger(40, random).toString(32));
-                        program.getFlowController().addNode(newSplitNode);
-                        DataBank.saveNode(newSplitNode); // We need to save the node after creating it to assign the ID correctly
-                        canvasController.drawProgram();
-                    }
-                });
-                menuItemFlowSplitNode.setId("SplitNode-");
-
-                MenuItem menuItemFlowStartNode = new MenuItem("Set Start Node");
-                MenuItem menuItemFlowRemoveNode = new MenuItem("Remove Node");
-                if (clickNodes.size() > 0) {
-                    DrawableNode drawableNode = clickNodes.get(0);
-                    menuItemFlowStartNode.setOnAction(new EventHandler<ActionEvent>() {
+                    MenuItem menuItemFlowAddNode = new MenuItem("Add Node");
+                    menuItemFlowAddNode.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent event) {
                             Program program = DataBank.currentlyEditProgram;
-                            DrawableNode startNode = program.getFlowController().getNodeById(Integer.parseInt(((MenuItem) event.getSource()).getId().replace("StartNode-", "")));
-                            program.getFlowController().setStartNode(startNode);
-                            DataBank.saveProgram(program);
+
+                            SecureRandom random = new SecureRandom();
+                            FlowNode newFlowNode = new FlowNode(0.0, 0.0, new BigInteger(40, random).toString(32));
+                            program.getFlowController().addNode(newFlowNode);
+                            DataBank.saveNode(newFlowNode); // We need to save the node after creating it to assign the ID correctly
+                            canvasController.drawProgram();
                         }
                     });
-                    menuItemFlowStartNode.setId("StartNode-" + drawableNode.getId());
+                    menuItemFlowAddNode.setId("AddNode-");
 
-                    menuItemFlowRemoveNode.setOnAction(new EventHandler<ActionEvent>() {
+                    MenuItem menuItemFlowAddResultSet = new MenuItem("Add Result Node");
+                    menuItemFlowAddResultSet.setOnAction(new EventHandler<ActionEvent>() {
                         @Override
                         public void handle(ActionEvent event) {
                             Program program = DataBank.currentlyEditProgram;
-                            DrawableNode removedNode = program.getFlowController().getNodeById(Integer.parseInt(((MenuItem) event.getSource()).getId().replace("RemoveNode-", "")));
 
-                            program.getFlowController().removeNode(removedNode);
-                            DataBank.deleteNode(removedNode);
-
+                            SecureRandom random = new SecureRandom();
+                            TestResultNode newResultSet = new TestResultNode(0.0, 0.0, new BigInteger(40, random).toString(32));
+                            program.getFlowController().addNode(newResultSet);
+                            DataBank.saveNode(newResultSet); // We need to save the node after creating it to assign the ID correctly
                             canvasController.drawProgram();
+                        }
+                    });
+                    menuItemFlowAddResultSet.setId("ResultNode-");
 
-                            Tab tabToRemove = null;
-                            for (Tab loopTab : tabPaneSource.getTabs()) {
-                                if (loopTab.getId() != null) {
-                                    if (loopTab.getId().equals(removedNode.getId().toString())) {
-                                        tabToRemove = loopTab;
+                    MenuItem menuItemFlowSplitNode = new MenuItem("Add Split Node");
+                    menuItemFlowSplitNode.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent event) {
+                            Program program = DataBank.currentlyEditProgram;
+
+                            SecureRandom random = new SecureRandom();
+                            SplitNode newSplitNode = new SplitNode(0.0, 0.0, new BigInteger(40, random).toString(32));
+                            program.getFlowController().addNode(newSplitNode);
+                            DataBank.saveNode(newSplitNode); // We need to save the node after creating it to assign the ID correctly
+                            canvasController.drawProgram();
+                        }
+                    });
+                    menuItemFlowSplitNode.setId("SplitNode-");
+
+                    MenuItem menuItemFlowStartNode = new MenuItem("Set Start Node");
+                    MenuItem menuItemFlowRemoveNode = new MenuItem("Remove Node");
+                    if (clickNodes.size() > 0) {
+                        DrawableNode drawableNode = clickNodes.get(0);
+                        menuItemFlowStartNode.setOnAction(new EventHandler<ActionEvent>() {
+                            @Override
+                            public void handle(ActionEvent event) {
+                                Program program = DataBank.currentlyEditProgram;
+                                DrawableNode startNode = program.getFlowController().getNodeById(Integer.parseInt(((MenuItem) event.getSource()).getId().replace("StartNode-", "")));
+                                program.getFlowController().setStartNode(startNode);
+                                DataBank.saveProgram(program);
+                            }
+                        });
+                        menuItemFlowStartNode.setId("StartNode-" + drawableNode.getId());
+
+                        menuItemFlowRemoveNode.setOnAction(new EventHandler<ActionEvent>() {
+                            @Override
+                            public void handle(ActionEvent event) {
+                                Program program = DataBank.currentlyEditProgram;
+                                DrawableNode removedNode = program.getFlowController().getNodeById(Integer.parseInt(((MenuItem) event.getSource()).getId().replace("RemoveNode-", "")));
+
+                                program.getFlowController().removeNode(removedNode);
+                                DataBank.deleteNode(removedNode);
+
+                                canvasController.drawProgram();
+
+                                Tab tabToRemove = null;
+                                for (Tab loopTab : tabPaneSource.getTabs()) {
+                                    if (loopTab.getId() != null) {
+                                        if (loopTab.getId().equals(removedNode.getId().toString())) {
+                                            tabToRemove = loopTab;
+                                        }
+                                    }
+                                }
+
+                                if (tabToRemove != null) {
+                                    EventHandler<Event> handler = tabToRemove.getOnClosed();
+                                    if (null != handler) {
+                                        handler.handle(null);
+                                    } else {
+                                        tabToRemove.getTabPane().getTabs().remove(tabToRemove);
                                     }
                                 }
                             }
+                        });
+                        menuItemFlowRemoveNode.setId("RemoveNode-" + drawableNode.getId());
+                    }
 
-                            if (tabToRemove != null) {
-                                EventHandler<Event> handler = tabToRemove.getOnClosed();
-                                if (null != handler) {
-                                    handler.handle(null);
-                                } else {
-                                    tabToRemove.getTabPane().getTabs().remove(tabToRemove);
-                                }
-                            }
-                        }
-                    });
-                    menuItemFlowRemoveNode.setId("RemoveNode-" + drawableNode.getId());
+                    ContextMenu contextMenu = new ContextMenu();
+                    contextMenu.getItems().add(menuItemFlowAddNode);
+                    contextMenu.getItems().add(menuItemFlowAddResultSet);
+                    contextMenu.getItems().add(menuItemFlowSplitNode);
+                    if (clickNodes.size() > 0) {
+                        contextMenu.getItems().add(menuItemFlowRemoveNode);
+                        contextMenu.getItems().add(menuItemFlowStartNode);
+                    }
+
+                    contextMenu.show(canvasFlow, event.getScreenX(), event.getScreenY());
                 }
-
-                ContextMenu contextMenu = new ContextMenu();
-                contextMenu.getItems().add(menuItemFlowAddNode);
-                contextMenu.getItems().add(menuItemFlowAddResultSet);
-                contextMenu.getItems().add(menuItemFlowSplitNode);
-                if (clickNodes.size() > 0) {
-                    contextMenu.getItems().add(menuItemFlowRemoveNode);
-                    contextMenu.getItems().add(menuItemFlowStartNode);
-                }
-
-                contextMenu.show(canvasFlow, event.getScreenX(), event.getScreenY());
             }
         });
 

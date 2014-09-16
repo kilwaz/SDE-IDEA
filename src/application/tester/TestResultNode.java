@@ -6,14 +6,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
 
-public class TestResultSet extends DrawableNode {
+public class TestResultNode extends DrawableNode {
     private ObservableList<TestResult> resultList = FXCollections.observableArrayList();
 
-    public TestResultSet(Double x, Double y, String containedText) {
+    public TestResultNode(Double x, Double y, String containedText) {
         super(x, y, 50.0, 40.0, Color.BLACK, containedText, -1, -1);
     }
 
-    public TestResultSet(Double x, Double y, String containedText, Integer id, Integer programId) {
+    public TestResultNode(Double x, Double y, String containedText, Integer id, Integer programId) {
         super(x, y, 50.0, 40.0, Color.BLACK, containedText, programId, id);
     }
 
@@ -31,6 +31,10 @@ public class TestResultSet extends DrawableNode {
         }
 
         Platform.runLater(new OneShotTask(testResult));
+    }
+
+    public String getNodeType() {
+        return "TestResultNode";
     }
 
     public ObservableList<TestResult> getResultList() {

@@ -1,6 +1,6 @@
 package application;
 
-import application.tester.TestResultSet;
+import application.tester.TestResultNode;
 import application.utils.DataBank;
 import javafx.scene.paint.Color;
 
@@ -20,17 +20,21 @@ public class FlowController {
         startNode.setId(-1);
     }
 
-    public void createNewNode(Integer id, Integer programId, String containedText, String source, String referenceID, Double sourceX, Double sourceY, Boolean isStartNode) {
-        DrawableNode newNode;
-        if ("".equals(source)) {
-            newNode = new TestResultSet(sourceX, sourceY, containedText, id, programId);
-        } else {
+    public void createNewNode(Integer id, Integer programId, String containedText, String source, String referenceID, Double sourceX, Double sourceY, String split1, String split2, String nodeType, Boolean isStartNode) {
+        DrawableNode newNode = null;
+        if ("TestResultNode".equals(nodeType)) {
+            newNode = new TestResultNode(sourceX, sourceY, containedText, id, programId);
+        } else if ("FlowNode".equals(nodeType)) {
             newNode = new FlowNode(sourceX, sourceY, containedText, source, id, programId);
+        } else if ("SplitNode".equals(nodeType)) {
+            newNode = new SplitNode(sourceX, sourceY, containedText, id, programId, split1, split2);
         }
 
-        nodes.add(newNode);
-        if (isStartNode && newNode instanceof FlowNode) {
-            startNode = newNode;
+        if (newNode != null) {
+            nodes.add(newNode);
+            if (isStartNode && newNode instanceof FlowNode) {
+                startNode = newNode;
+            }
         }
 
         this.referenceID = referenceID;
@@ -120,7 +124,9 @@ public class FlowController {
         for (DrawableNode node : nodes) {
             if (node instanceof FlowNode) {
                 DataBank.saveInstanceObject(referenceID, node.getContainedText(), ((FlowNode) node).getSource());
-            } else if (node instanceof TestResultSet) {
+            } else if (node instanceof TestResultNode) {
+                DataBank.saveInstanceObject(referenceID, node.getContainedText(), node);
+            } else if (node instanceof SplitNode) {
                 DataBank.saveInstanceObject(referenceID, node.getContainedText(), node);
             }
         }
@@ -169,19 +175,38 @@ public class FlowController {
                         }
                     }
                 }
+            } else if (startNode instanceof SplitNode) {
+                for (DrawableNode endNode : getNodes()) {
+                    List<Split> splits = ((SplitNode) startNode).getSplits();
+                    if ((splits.get(0).getTarget().equals(endNode.getContainedText()) && splits.get(0).isEnabled())
+                            || (splits.get(1).getTarget().equals(endNode.getContainedText()) && splits.get(1).isEnabled())) {
+                        if (!connectionExists(startNode, endNode)) {
+                            NodeConnection newConnection = new NodeConnection(startNode, endNode);
+                            connections.add(newConnection);
+                            updateCanvas = true;
+                        }
+                    }
+                }
             }
         }
 
         // Checks old connections and removes ones that don't exist
         List<NodeConnection> listToRemove = new ArrayList<NodeConnection>();
         for (NodeConnection nodeConnection : connections) {
-            if (startNode instanceof FlowNode) {
+            if (nodeConnection.getConnectionStart() instanceof FlowNode) {
                 if (!((FlowNode) nodeConnection.getConnectionStart()).getSource().getSource().contains("run(\"" + nodeConnection.getConnectionEnd().getContainedText())) {
                     listToRemove.add(nodeConnection);
                     updateCanvas = true;
                 }
+            } else if (nodeConnection.getConnectionStart() instanceof SplitNode) {
+                List<Split> splits = ((SplitNode) nodeConnection.getConnectionStart()).getSplits();
+                String endContainedText = nodeConnection.getConnectionEnd().getContainedText();
+                if ((!splits.get(0).getTarget().equals(endContainedText) || !splits.get(0).isEnabled())
+                        && (!splits.get(1).getTarget().equals(endContainedText) || !splits.get(1).isEnabled())) {
+                    listToRemove.add(nodeConnection);
+                    updateCanvas = true;
+                }
             }
-
         }
 
         connections.removeAll(listToRemove);
@@ -231,6 +256,18 @@ public class FlowController {
             node.setColor(Color.BLACK);
         }
         Controller.getInstance().updateCanvasControllerLater();
+    }
+
+    public static FlowNode getSourceFromContainedText(String text) {
+        for (Program program : DataBank.getPrograms()) {
+            for (DrawableNode node : program.getFlowController().getNodes()) {
+                if (node.getContainedText().equals(text)) {
+                    return (FlowNode) node;
+                }
+            }
+        }
+
+        return null;
     }
 
     public static FlowNode getSourceFromReference(String reference) {

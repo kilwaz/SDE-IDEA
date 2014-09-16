@@ -29,6 +29,10 @@ public class FlowNode extends DrawableNode {
         this.source.setId(id);
     }
 
+    public String getNodeType() {
+        return "FlowNode";
+    }
+
     public Source getSource() {
         return this.source;
     }

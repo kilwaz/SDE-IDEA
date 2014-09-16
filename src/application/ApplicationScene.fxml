@@ -12,10 +12,9 @@
                    maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" AnchorPane.bottomAnchor="0.0"
                    AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <items>
-                <AnchorPane fx:id="leftAccordionAnchorPane" maxHeight="1.7976931348623157E308"
-                            maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0"
-                            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                            AnchorPane.topAnchor="0.0">
+                <AnchorPane fx:id="leftAccordionAnchorPane" maxHeight="1.7976931348623157E308" maxWidth="160.0"
+                            minHeight="0.0" minWidth="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                            AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <children>
                         <Accordion fx:id="leftAccordion" maxHeight="1.7976931348623157E308"
                                    maxWidth="1.7976931348623157E308" AnchorPane.bottomAnchor="0.0"
@@ -58,23 +57,22 @@
                                             AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                                             AnchorPane.topAnchor="0.0">
                                     <children>
-                                        <TabPane tabClosingPolicy="UNAVAILABLE" maxHeight="1.7976931348623157E308"
-                                                 maxWidth="1.7976931348623157E308" AnchorPane.bottomAnchor="0.0"
+                                        <TabPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                                                 tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0"
                                                  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                                                  AnchorPane.topAnchor="0.0">
                                             <tabs>
                                                 <Tab text="Flow">
                                                     <content>
-                                                        <AnchorPane minHeight="0.0" minWidth="0.0"
-                                                                    maxHeight="1.7976931348623157E308"
-                                                                    maxWidth="1.7976931348623157E308"
-                                                                    AnchorPane.bottomAnchor="0.0"
+                                                        <AnchorPane maxHeight="1.7976931348623157E308"
+                                                                    maxWidth="1.7976931348623157E308" minHeight="0.0"
+                                                                    minWidth="0.0" AnchorPane.bottomAnchor="0.0"
                                                                     AnchorPane.leftAnchor="0.0"
                                                                     AnchorPane.rightAnchor="0.0"
                                                                     AnchorPane.topAnchor="0.0">
                                                             <children>
-                                                                <Canvas fx:id="canvasFlow" layoutX="6.0" layoutY="6.0"
-                                                                        width="700" height="400"
+                                                                <Canvas fx:id="canvasFlow" height="400" layoutX="6.0"
+                                                                        layoutY="6.0" width="700"
                                                                         AnchorPane.bottomAnchor="0.0"
                                                                         AnchorPane.leftAnchor="0.0"
                                                                         AnchorPane.rightAnchor="0.0"

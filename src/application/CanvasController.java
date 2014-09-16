@@ -1,5 +1,6 @@
 package application;
 
+import application.tester.TestResultNode;
 import application.utils.DataBank;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
@@ -100,7 +101,16 @@ public class CanvasController {
 
     public void drawNode(DrawableNode drawableNode) {
         gc.setStroke(drawableNode.getColor());
-        gc.setFill(Color.WHITE);
+        if (drawableNode instanceof SplitNode) {
+            gc.setFill(Color.LIGHTCYAN);
+        } else if (drawableNode instanceof FlowNode) {
+            gc.setFill(Color.LIGHTGREEN);
+        } else if (drawableNode instanceof TestResultNode) {
+            gc.setFill(Color.LIGHTSTEELBLUE);
+        } else {
+            gc.setFill(Color.WHITE);
+        }
+
         gc.fillRect(drawableNode.getScaledX(), drawableNode.getScaledY(), drawableNode.getScaledWidth(), drawableNode.getScaledHeight());
         gc.strokeRect(drawableNode.getScaledX(), drawableNode.getScaledY(), drawableNode.getScaledWidth(), drawableNode.getScaledHeight());
 
@@ -130,7 +140,6 @@ public class CanvasController {
             gc.setTextBaseline(VPos.CENTER);
             gc.setFill(Color.BLACK);
             gc.fillText(drawableNode.getContainedText(), drawableNode.getScaledCenterX(), drawableNode.getScaledCenterY());
-
         }
     }
 

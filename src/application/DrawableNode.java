@@ -120,6 +120,10 @@ public class DrawableNode {
         this.id = id;
     }
 
+    public String getNodeType() {
+        return "DrawableNode";
+    }
+
     public Boolean isCoordInside(Double x, Double y) {
         if (x > this.x * scale && x < this.x * scale + this.width * scale) {
             if (y > this.y * scale && y < this.y * scale + this.height * scale) {

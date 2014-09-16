@@ -66,8 +66,12 @@ public class Program {
     }
 
     public static void runHelper(String name, String referenceID, Boolean whileWaiting, HashMap<String, Object> map) {
-        Source source = (Source) DataBank.getInstanceObject(referenceID, name);
-        source.run(whileWaiting, map);
+        Object node = DataBank.getInstanceObject(referenceID, name);
+        if (node instanceof Source) {
+            ((Source) node).run(whileWaiting, map);
+        } else if (node instanceof SplitNode) {
+            ((SplitNode) node).run(whileWaiting, map);
+        }
     }
 
     public String toString() {

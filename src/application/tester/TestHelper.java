@@ -84,7 +84,7 @@ public class TestHelper {
         }
     }
 
-    public static TestResultSet getResultSet(String resultSet, String referenceID) {
-        return (TestResultSet) DataBank.getInstanceObject(referenceID, resultSet);
+    public static TestResultNode getResultSet(String resultSet, String referenceID) {
+        return (TestResultNode) DataBank.getInstanceObject(referenceID, resultSet);
     }
 }

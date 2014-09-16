@@ -177,10 +177,10 @@ public class DataBank {
                 mySQLInstance = MySQLConnectionManager.getInstance();
             }
 
-            PreparedStatement preparedStatement = mySQLInstance.getPreparedStatement("update node set contained_text = ?, source = ?, source_x = ?, source_y = ? where id = ?");
+            PreparedStatement preparedStatement = mySQLInstance.getPreparedStatement("update node set contained_text = ?, source = ?, source_x = ?, source_y = ?, split_1 = ?, split_2 = ? where id = ?");
             if (preparedStatement != null) {
                 preparedStatement.setString(1, node.getContainedText());
-                if (node instanceof FlowNode) {
+                if (node instanceof FlowNode) { // Source
                     preparedStatement.setString(2, ((FlowNode) node).getSource().getSource());
                 } else {
                     preparedStatement.setString(2, "");
@@ -188,18 +188,27 @@ public class DataBank {
 
                 preparedStatement.setDouble(3, node.getX());
                 preparedStatement.setDouble(4, node.getY());
-                preparedStatement.setInt(5, node.getId());
+                if (node instanceof SplitNode) { // Split choices
+                    List<Split> splits = ((SplitNode) node).getSplits();
+                    preparedStatement.setString(5, splits.get(0).getTarget());
+                    preparedStatement.setString(6, splits.get(1).getTarget());
+                } else {
+                    preparedStatement.setString(5, "");
+                    preparedStatement.setString(6, "");
+                }
+                preparedStatement.setInt(7, node.getId());
+
                 int result = preparedStatement.executeUpdate();
                 preparedStatement.close();
 
                 if (result == 0) { // If record does not exist insert a new one..
                     node.setId(getNextId("node")); // Gets the next ID for a node that is about to be created
 
-                    preparedStatement = mySQLInstance.getPreparedStatement("insert into node values (default, ?, ?, ?, ?, ?, ?)");
+                    preparedStatement = mySQLInstance.getPreparedStatement("insert into node values (default, ?, ?, ?, ?, ?, ?, ? ,?, ?)");
                     if (preparedStatement != null) {
                         preparedStatement.setInt(1, node.getProgramId());
                         preparedStatement.setString(2, node.getContainedText());
-                        if (node instanceof FlowNode) {
+                        if (node instanceof FlowNode) { // Source
                             preparedStatement.setString(3, ((FlowNode) node).getSource().getSource());
                         } else {
                             preparedStatement.setString(3, "");
@@ -207,6 +216,17 @@ public class DataBank {
                         preparedStatement.setInt(4, node.getId());
                         preparedStatement.setDouble(5, node.getX());
                         preparedStatement.setDouble(6, node.getY());
+                        if (node instanceof SplitNode) { // Split choices
+                            List<Split> splits = ((SplitNode) node).getSplits();
+                            preparedStatement.setString(7, splits.get(0).getTarget());
+                            preparedStatement.setString(8, splits.get(1).getTarget());
+                        } else {
+                            preparedStatement.setString(7, "");
+                            preparedStatement.setString(8, "");
+                        }
+
+                        preparedStatement.setString(9, node.getNodeType());
+
                         preparedStatement.executeUpdate();
                         preparedStatement.close();
                     }
@@ -229,7 +249,7 @@ public class DataBank {
                 Integer programId = resultSet.getInt("id");
                 Integer startNode = resultSet.getInt("start_node");
                 Program loadedProgram = new Program(name, programId);
-                ResultSet sourceResultSet = mySQLInstance.runQuery("select id,program_id,source,contained_text,reference_id,source_x,source_y from node where program_id = '" + programId + "';");
+                ResultSet sourceResultSet = mySQLInstance.runQuery("select id,program_id,source,contained_text,reference_id,source_x,source_y,split_1,split_2,node_type from node where program_id = '" + programId + "';");
                 FlowController flowController = loadedProgram.getFlowController();
 
                 while (sourceResultSet.next()) {
@@ -241,6 +261,9 @@ public class DataBank {
                             sourceResultSet.getString("reference_id"),
                             sourceResultSet.getDouble("source_x"),
                             sourceResultSet.getDouble("source_y"),
+                            sourceResultSet.getString("split_1"),
+                            sourceResultSet.getString("split_2"),
+                            sourceResultSet.getString("node_type"),
                             true);
                 }
 

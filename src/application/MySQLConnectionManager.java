@@ -20,6 +20,9 @@ public class MySQLConnectionManager {
         reference_id VARCHAR(100),
         source_x DOUBLE,
         source_y DOUBLE,
+        split_1 VARCHAR(100),
+        split_2 VARCHAR(100),
+        node_type VARCHAR(100),
         PRIMARY KEY (id));
 
     create table connection (

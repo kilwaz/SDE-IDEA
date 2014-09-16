@@ -2,7 +2,7 @@ package application;
 
 import application.net.SSHManager;
 import application.tester.TestResult;
-import application.tester.TestResultSet;
+import application.tester.TestResultNode;
 import application.utils.DataBank;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -18,7 +18,9 @@ import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import org.controlsfx.dialog.Dialogs;
 
 import javax.swing.*;
@@ -147,8 +149,10 @@ public class Controller implements Initializable {
                         DrawableNode drawableNode = clickNodes.get(0);
                         if (drawableNode instanceof FlowNode) {
                             createOrShowSourceTab((FlowNode) drawableNode);
-                        } else if (drawableNode instanceof TestResultSet) {
-                            createOrShowResultSetTab((TestResultSet) drawableNode);
+                        } else if (drawableNode instanceof TestResultNode) {
+                            createOrShowResultSetTab((TestResultNode) drawableNode);
+                        } else if (drawableNode instanceof SplitNode) {
+                            createOrShowSplitTab((SplitNode) drawableNode);
                         }
                     }
                 }
@@ -184,13 +188,28 @@ public class Controller implements Initializable {
                         Program program = DataBank.currentlyEditProgram;
 
                         SecureRandom random = new SecureRandom();
-                        TestResultSet newResultSet = new TestResultSet(0.0, 0.0, new BigInteger(40, random).toString(32));
+                        TestResultNode newResultSet = new TestResultNode(0.0, 0.0, new BigInteger(40, random).toString(32));
                         program.getFlowController().addNode(newResultSet);
                         DataBank.saveNode(newResultSet); // We need to save the node after creating it to assign the ID correctly
                         canvasController.drawProgram();
                     }
                 });
                 menuItemFlowAddResultSet.setId("ResultNode-");
+
+                MenuItem menuItemFlowSplitNode = new MenuItem("Add Split Node");
+                menuItemFlowSplitNode.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        Program program = DataBank.currentlyEditProgram;
+
+                        SecureRandom random = new SecureRandom();
+                        SplitNode newSplitNode = new SplitNode(0.0, 0.0, new BigInteger(40, random).toString(32));
+                        program.getFlowController().addNode(newSplitNode);
+                        DataBank.saveNode(newSplitNode); // We need to save the node after creating it to assign the ID correctly
+                        canvasController.drawProgram();
+                    }
+                });
+                menuItemFlowSplitNode.setId("SplitNode-");
 
                 MenuItem menuItemFlowStartNode = new MenuItem("Set Start Node");
                 MenuItem menuItemFlowRemoveNode = new MenuItem("Remove Node");
@@ -243,6 +262,7 @@ public class Controller implements Initializable {
                 ContextMenu contextMenu = new ContextMenu();
                 contextMenu.getItems().add(menuItemFlowAddNode);
                 contextMenu.getItems().add(menuItemFlowAddResultSet);
+                contextMenu.getItems().add(menuItemFlowSplitNode);
                 if (clickNodes.size() > 0) {
                     contextMenu.getItems().add(menuItemFlowRemoveNode);
                     contextMenu.getItems().add(menuItemFlowStartNode);
@@ -358,16 +378,120 @@ public class Controller implements Initializable {
         tabPaneSource.setTabClosingPolicy(TabPane.TabClosingPolicy.ALL_TABS);
     }
 
-    public void createOrShowResultSetTab(TestResultSet testResultSet) {
+    public void createOrShowSplitTab(SplitNode splitNode) {
         // Test to see if the tab exists and if so show it
         for (Tab loopTab : tabPaneSource.getTabs()) {
             if (loopTab.getId() != null) {
-                if (loopTab.getId().equals(testResultSet.getId().toString())) {
+                if (loopTab.getId().equals(splitNode.getId().toString())) {
                     SingleSelectionModel<Tab> selectionModel = tabPaneSource.getSelectionModel();
                     selectionModel.select(loopTab);
 
-                    TextField textField = (TextField) stackPane.lookup("#fieldName-" + testResultSet.getId());
-                    textField.setText(testResultSet.getContainedText());
+                    TextField textField = (TextField) stackPane.lookup("#fieldName-" + splitNode.getId());
+                    textField.setText(splitNode.getContainedText());
+
+                    return;
+                }
+            }
+        }
+        // As the tab doesn't exist we create it here
+        Tab tab = new Tab();
+        AnchorPane tabAnchorPane = new AnchorPane();
+
+        tabAnchorPane.setMaxHeight(Integer.MAX_VALUE);
+        tabAnchorPane.setMaxWidth(Integer.MAX_VALUE);
+        AnchorPane.setBottomAnchor(tabAnchorPane, 0.0);
+        AnchorPane.setLeftAnchor(tabAnchorPane, 0.0);
+        AnchorPane.setRightAnchor(tabAnchorPane, 0.0);
+        AnchorPane.setTopAnchor(tabAnchorPane, 0.0);
+
+        VBox rows = new VBox(5);
+        rows.setLayoutY(55);
+        rows.setLayoutX(11);
+
+        List<Split> splits = splitNode.getSplits();
+        for (int i = 0; i < splits.size(); i++) {
+            rows.getChildren().add(createSplitNodeRow(i, splits.get(i), splitNode.getId()));
+        }
+
+        tabAnchorPane.getChildren().add(createNodeNameField(splitNode));
+        tabAnchorPane.getChildren().add(createNodeNameLabel());
+        tabAnchorPane.getChildren().add(rows);
+        tab.setText(splitNode.getContainedText());
+        tab.setId(splitNode.getId().toString());
+        tab.setContent(tabAnchorPane);
+
+        tabPaneSource.getTabs().add(tab);
+
+        // Go back to the beginning and run the code to show the tab, it should now exist
+        createOrShowSplitTab(splitNode);
+    }
+
+    public HBox createSplitNodeRow(Integer index, Split split, final Integer splitId) {
+        HBox row = new HBox(5);
+        Button firstSplitButton = new Button();
+        if (split.isEnabled()) {
+            firstSplitButton.setText("Enabled");
+        } else {
+            firstSplitButton.setText("Disabled");
+        }
+        firstSplitButton.setPrefWidth(80);
+        firstSplitButton.setId("splitButton-" + index + "-" + splitId);
+        firstSplitButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Button button = (Button) event.getSource();
+                Program program = DataBank.currentlyEditProgram;
+                String[] fieldId = button.getId().split("-");
+                SplitNode splitNode = (SplitNode) program.getFlowController().getNodeById(Integer.parseInt(fieldId[2]));
+                splitNode.toggleSplit(Integer.parseInt(fieldId[1]));
+
+                if (splitNode.getSplit(Integer.parseInt(fieldId[1])).isEnabled()) {
+                    button.setText("Enabled");
+                } else {
+                    button.setText("Disabled");
+                }
+
+                program.getFlowController().checkConnections(); // Toggling a switch will make or break connections
+            }
+        });
+        row.getChildren().add(firstSplitButton);
+
+        TextField firstSplitField = new TextField();
+        firstSplitField.setText(split.getTarget());
+        firstSplitField.setId("splitField-" + index + "-" + splitId);
+        firstSplitField.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                TextField textField = (TextField) event.getSource();
+                if (!textField.getText().isEmpty()) {
+                    Program program = DataBank.currentlyEditProgram;
+                    String[] fieldId = textField.getId().split("-");
+                    SplitNode splitNode = (SplitNode) program.getFlowController().getNodeById(Integer.parseInt(fieldId[2]));
+                    splitNode.setSplit(Integer.parseInt(fieldId[1]), textField.getText());
+
+                    program.getFlowController().checkConnections(); // Renaming a node might make or break connections
+
+                    DataBank.saveNode(splitNode);
+                    canvasController.drawProgram();
+                }
+            }
+        });
+
+        row.getChildren().add(firstSplitField);
+
+        return row;
+    }
+
+    public void createOrShowResultSetTab(TestResultNode testResultNode) {
+        // Test to see if the tab exists and if so show it
+        for (Tab loopTab : tabPaneSource.getTabs()) {
+            if (loopTab.getId() != null) {
+                if (loopTab.getId().equals(testResultNode.getId().toString())) {
+                    SingleSelectionModel<Tab> selectionModel = tabPaneSource.getSelectionModel();
+                    selectionModel.select(loopTab);
+
+                    TextField textField = (TextField) stackPane.lookup("#fieldName-" + testResultNode.getId());
+                    textField.setText(testResultNode.getContainedText());
 
                     return;
                 }
@@ -378,7 +502,7 @@ public class Controller implements Initializable {
 
         AnchorPane tabAnchorPane = new AnchorPane();
         TableView<TestResult> resultsTable = new TableView<TestResult>();
-        resultsTable.setId("resultsTable-" + testResultSet.getId());
+        resultsTable.setId("resultsTable-" + testResultNode.getId());
 
         TableColumn expectedOutput = new TableColumn("Expected Output");
         expectedOutput.setMinWidth(120);
@@ -392,7 +516,7 @@ public class Controller implements Initializable {
         duration.setMinWidth(120);
         duration.setCellValueFactory(new PropertyValueFactory<TestResult, String>("duration"));
 
-        resultsTable.setItems(testResultSet.getResultList());
+        resultsTable.setItems(testResultNode.getResultList());
         resultsTable.getColumns().addAll(expectedOutput);
         resultsTable.getColumns().addAll(actualOutput);
         resultsTable.getColumns().addAll(duration);
@@ -414,17 +538,17 @@ public class Controller implements Initializable {
         AnchorPane.setRightAnchor(tabAnchorPane, 0.0);
         AnchorPane.setTopAnchor(tabAnchorPane, 0.0);
 
-        tabAnchorPane.getChildren().add(createNodeNameField(testResultSet));
+        tabAnchorPane.getChildren().add(createNodeNameField(testResultNode));
         tabAnchorPane.getChildren().add(createNodeNameLabel());
         tabAnchorPane.getChildren().add(resultsTable);
-        tab.setText(testResultSet.getContainedText());
-        tab.setId(testResultSet.getId().toString());
+        tab.setText(testResultNode.getContainedText());
+        tab.setId(testResultNode.getId().toString());
         tab.setContent(tabAnchorPane);
 
         tabPaneSource.getTabs().add(tab);
 
         // Go back to the beginning and run the code to show the tab, it should now exist
-        createOrShowResultSetTab(testResultSet);
+        createOrShowResultSetTab(testResultNode);
     }
 
     public TextField createNodeNameField(DrawableNode drawableNode) {
@@ -436,17 +560,17 @@ public class Controller implements Initializable {
         nameField.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                TextField nameField = (TextField) event.getSource();
-                if (!nameField.getText().isEmpty()) {
+                TextField textField = (TextField) event.getSource();
+                if (!textField.getText().isEmpty()) {
                     Program program = DataBank.currentlyEditProgram;
-                    DrawableNode nodeToUpdate = program.getFlowController().getNodeById(Integer.parseInt(nameField.getId().replace("fieldName-", "")));
-                    nodeToUpdate.setContainedText(nameField.getText());
+                    DrawableNode nodeToUpdate = program.getFlowController().getNodeById(Integer.parseInt(textField.getId().replace("fieldName-", "")));
+                    nodeToUpdate.setContainedText(textField.getText());
                     program.getFlowController().checkConnections(); // Renaming a node might make or break connections
 
                     for (Tab loopTab : tabPaneSource.getTabs()) {
                         if (loopTab.getId() != null) {
                             if (loopTab.getId().equals(nodeToUpdate.getId().toString())) {
-                                loopTab.setText(nameField.getText());
+                                loopTab.setText(textField.getText());
                             }
                         }
                     }

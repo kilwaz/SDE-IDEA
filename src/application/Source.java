@@ -46,6 +46,11 @@ public class Source {
             this.compiled = false;
             this.source = source;
             DataBank.saveNode(parentFlowNode);
+
+            Program program = DataBank.currentlyEditProgram;
+            if (program != null) {
+                program.getFlowController().checkConnections();
+            }
         }
     }
 

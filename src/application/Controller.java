@@ -14,17 +14,16 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebEngine;
 import javafx.stage.Stage;
 import org.controlsfx.dialog.Dialogs;
 
-import javax.swing.*;
 import java.math.BigInteger;
 import java.net.URL;
 import java.security.SecureRandom;
@@ -609,6 +608,8 @@ public class Controller implements Initializable {
         return nameFieldLabel;
     }
 
+    private WebEngine webEngine;
+
     public void createOrShowSourceTab(FlowNode flowNode) {
         // Test to see if the tab exists and if so show it
         for (Tab loopTab : tabPaneSource.getTabs()) {
@@ -639,15 +640,12 @@ public class Controller implements Initializable {
         tabAnchorPane.getChildren().add(createNodeNameField(flowNode));
         tabAnchorPane.getChildren().add(createNodeNameLabel());
 
-        SwingTextArea tabTextArea = new SwingTextArea();
-        tabTextArea.setLayoutX(11);
-        tabTextArea.setLayoutY(50);
-        tabTextArea.setId("textArea-" + flowNode.getId());
+        SourceTextArea sourceTextArea = new SourceTextArea(flowNode);
 
-        AnchorPane.setBottomAnchor(tabTextArea, 0.0);
-        AnchorPane.setLeftAnchor(tabTextArea, 11.0);
-        AnchorPane.setRightAnchor(tabTextArea, 0.0);
-        AnchorPane.setTopAnchor(tabTextArea, 50.0);
+        AnchorPane.setBottomAnchor(sourceTextArea, 0.0);
+        AnchorPane.setLeftAnchor(sourceTextArea, 11.0);
+        AnchorPane.setRightAnchor(sourceTextArea, 0.0);
+        AnchorPane.setTopAnchor(sourceTextArea, 50.0);
 
         tabAnchorPane.setMaxHeight(Integer.MAX_VALUE);
         tabAnchorPane.setMaxWidth(Integer.MAX_VALUE);
@@ -656,9 +654,7 @@ public class Controller implements Initializable {
         AnchorPane.setRightAnchor(tabAnchorPane, 0.0);
         AnchorPane.setTopAnchor(tabAnchorPane, 0.0);
 
-        // Setup the text area
-        SwingUtilities.invokeLater(tabTextArea);
-        tabAnchorPane.getChildren().add(tabTextArea);
+        tabAnchorPane.getChildren().add(sourceTextArea);
         tab.setContent(tabAnchorPane);
 
         tabPaneSource.getTabs().add(tab);

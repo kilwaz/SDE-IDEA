@@ -167,7 +167,7 @@ public class FlowController {
                 String src = ((FlowNode) startNode).getSource().getSource();
 
                 for (DrawableNode endNode : getNodes()) {
-                    if (src.contains("run(\"" + endNode.getContainedText())) {
+                    if (src.contains("run(\"" + endNode.getContainedText() + "\"")) {
                         if (!connectionExists(startNode, endNode)) {
                             NodeConnection newConnection = new NodeConnection(startNode, endNode);
                             connections.add(newConnection);
@@ -194,7 +194,7 @@ public class FlowController {
         List<NodeConnection> listToRemove = new ArrayList<NodeConnection>();
         for (NodeConnection nodeConnection : connections) {
             if (nodeConnection.getConnectionStart() instanceof FlowNode) {
-                if (!((FlowNode) nodeConnection.getConnectionStart()).getSource().getSource().contains("run(\"" + nodeConnection.getConnectionEnd().getContainedText())) {
+                if (!((FlowNode) nodeConnection.getConnectionStart()).getSource().getSource().contains("run(\"" + nodeConnection.getConnectionEnd().getContainedText() + "\"")) {
                     listToRemove.add(nodeConnection);
                     updateCanvas = true;
                 }

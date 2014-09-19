@@ -2,16 +2,24 @@ package application;
 
 import javafx.scene.paint.Color;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DrawableNode {
     private Integer id = -1;
-    private Double x;
-    private Double y;
-    private Double width;
-    private Double height;
-    private Color color;
+    private Double x = 0.0;
+    private Double y = 0.0;
+    private Double width = 40.0;
+    private Double height = 40.0;
+    private Color color = Color.BLACK;
     private Double scale = 1.0;
-    private String containedText = "";
+    private String containedText = "Unnamed";
     private Integer programId = -1;
+
+    public DrawableNode(Integer id, Integer programId) {
+        this.programId = programId;
+        this.id = id;
+    }
 
     public DrawableNode(Double x, Double y, Double width, Double height, Color color, String containedText, Integer programId, Integer id) {
         this.x = x;
@@ -22,6 +30,17 @@ public class DrawableNode {
         this.containedText = containedText;
         this.programId = programId;
         this.id = id;
+    }
+
+    public List<SavableAttribute> getDataToSave() {
+        List<SavableAttribute> savableAttributes = new ArrayList<SavableAttribute>();
+
+        savableAttributes.add(new SavableAttribute("X", x.getClass().getName(), x));
+        savableAttributes.add(new SavableAttribute("Id", id.getClass().getName(), id));
+        savableAttributes.add(new SavableAttribute("Y", y.getClass().getName(), y));
+        savableAttributes.add(new SavableAttribute("ContainedText", containedText.getClass().getName(), containedText));
+
+        return savableAttributes;
     }
 
     public Double getCenterX() {

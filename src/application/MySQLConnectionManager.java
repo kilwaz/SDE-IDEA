@@ -15,23 +15,23 @@ public class MySQLConnectionManager {
     create table node(
         id INT NOT NULL AUTO_INCREMENT,
         program_id INT,
-        contained_text VARCHAR(100),
-        source VARCHAR(4000),
-        reference_id VARCHAR(100),
-        source_x DOUBLE,
-        source_y DOUBLE,
-        split_1 VARCHAR(100),
-        split_2 VARCHAR(100),
         node_type VARCHAR(100),
         PRIMARY KEY (id));
 
-    create table connection (
+    create table node_details(
         id INT NOT NULL AUTO_INCREMENT,
-        node_start INT,
-        node_end INT,
+        node_id INT,
+        object_name VARCHAR(100),
+        object_class VARCHAR(100),
+        object_value BLOB,
         PRIMARY KEY (id));
 
-        insert into node values (default, 1,'YAY', 'hello','s1',10,10);
+    create table split(
+        id INT NOT NULL AUTO_INCREMENT,
+        node_id INT,
+        target VARCHAR(100),
+        enabled BOOL,
+        PRIMARY KEY (id));
     */
 
     public MySQLConnectionManager() {

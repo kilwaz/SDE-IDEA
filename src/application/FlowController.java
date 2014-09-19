@@ -20,14 +20,14 @@ public class FlowController {
         startNode.setId(-1);
     }
 
-    public void createNewNode(Integer id, Integer programId, String containedText, String source, String referenceID, Double sourceX, Double sourceY, String split1, String split2, String nodeType, Boolean isStartNode) {
+    public DrawableNode createNewNode(Integer id, Integer programId, String nodeType, Boolean isStartNode) {
         DrawableNode newNode = null;
         if ("TestResultNode".equals(nodeType)) {
-            newNode = new TestResultNode(sourceX, sourceY, containedText, id, programId);
+            newNode = new TestResultNode(id, programId);
         } else if ("FlowNode".equals(nodeType)) {
-            newNode = new FlowNode(sourceX, sourceY, containedText, source, id, programId);
+            newNode = new FlowNode(id, programId);
         } else if ("SplitNode".equals(nodeType)) {
-            newNode = new SplitNode(sourceX, sourceY, containedText, id, programId, split1, split2);
+            newNode = new SplitNode(id, programId);
         }
 
         if (newNode != null) {
@@ -38,6 +38,7 @@ public class FlowController {
         }
 
         this.referenceID = referenceID;
+        return newNode;
     }
 
     public void addNode(DrawableNode drawableNode) {
@@ -178,13 +179,18 @@ public class FlowController {
             } else if (startNode instanceof SplitNode) {
                 for (DrawableNode endNode : getNodes()) {
                     List<Split> splits = ((SplitNode) startNode).getSplits();
-                    if ((splits.get(0).getTarget().equals(endNode.getContainedText()) && splits.get(0).isEnabled())
-                            || (splits.get(1).getTarget().equals(endNode.getContainedText()) && splits.get(1).isEnabled())) {
-                        if (!connectionExists(startNode, endNode)) {
-                            NodeConnection newConnection = new NodeConnection(startNode, endNode);
-                            connections.add(newConnection);
-                            updateCanvas = true;
+
+                    Boolean createConnection = false;
+                    for (Split split : splits) {
+                        if ((split.getTarget().equals(endNode.getContainedText()) && split.isEnabled())) {
+                            createConnection = true;
                         }
+                    }
+
+                    if (createConnection && !connectionExists(startNode, endNode)) {
+                        NodeConnection newConnection = new NodeConnection(startNode, endNode);
+                        connections.add(newConnection);
+                        updateCanvas = true;
                     }
                 }
             }
@@ -201,8 +207,14 @@ public class FlowController {
             } else if (nodeConnection.getConnectionStart() instanceof SplitNode) {
                 List<Split> splits = ((SplitNode) nodeConnection.getConnectionStart()).getSplits();
                 String endContainedText = nodeConnection.getConnectionEnd().getContainedText();
-                if ((!splits.get(0).getTarget().equals(endContainedText) || !splits.get(0).isEnabled())
-                        && (!splits.get(1).getTarget().equals(endContainedText) || !splits.get(1).isEnabled())) {
+                Integer removeCount = 0;
+                for (Split split : splits) {
+                    if ((!split.getTarget().equals(endContainedText) || !split.isEnabled())) {
+                        removeCount++;
+                    }
+                }
+
+                if (removeCount.equals(splits.size())) {
                     listToRemove.add(nodeConnection);
                     updateCanvas = true;
                 }

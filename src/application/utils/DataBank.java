@@ -2,6 +2,8 @@ package application.utils;
 
 import application.*;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -177,58 +179,50 @@ public class DataBank {
                 mySQLInstance = MySQLConnectionManager.getInstance();
             }
 
-            PreparedStatement preparedStatement = mySQLInstance.getPreparedStatement("update node set contained_text = ?, source = ?, source_x = ?, source_y = ?, split_1 = ?, split_2 = ? where id = ?");
-            if (preparedStatement != null) {
-                preparedStatement.setString(1, node.getContainedText());
-                if (node instanceof FlowNode) { // Source
-                    preparedStatement.setString(2, ((FlowNode) node).getSource().getSource());
-                } else {
-                    preparedStatement.setString(2, "");
+            PreparedStatement preparedStatement = mySQLInstance.getPreparedStatement("update node set program_id = ?, node_type = ? where id = ?");
+            preparedStatement.setInt(1, node.getProgramId());
+            preparedStatement.setString(2, node.getNodeType());
+            preparedStatement.setInt(3, node.getId());
+            int result = preparedStatement.executeUpdate();
+            preparedStatement.close();
+
+            if (result == 0) { // If record does not exist insert a new one..
+                node.setId(getNextId("node")); // Gets the next ID for a node that is about to be created
+
+                preparedStatement = mySQLInstance.getPreparedStatement("insert into node values (default, ?, ?)");
+                if (preparedStatement != null) {
+                    preparedStatement.setInt(1, node.getProgramId());
+                    preparedStatement.setString(2, node.getNodeType());
+
+                    preparedStatement.executeUpdate();
+                    preparedStatement.close();
                 }
+            }
 
-                preparedStatement.setDouble(3, node.getX());
-                preparedStatement.setDouble(4, node.getY());
-                if (node instanceof SplitNode) { // Split choices
-                    List<Split> splits = ((SplitNode) node).getSplits();
-                    preparedStatement.setString(5, splits.get(0).getTarget());
-                    preparedStatement.setString(6, splits.get(1).getTarget());
-                } else {
-                    preparedStatement.setString(5, "");
-                    preparedStatement.setString(6, "");
-                }
-                preparedStatement.setInt(7, node.getId());
+            // update node_details
+            List<SavableAttribute> savableAttributes = node.getDataToSave();
+            for (SavableAttribute savableAttribute : savableAttributes) {
+                preparedStatement = mySQLInstance.getPreparedStatement("update node_details set object_value = ? where node_id = ? and object_name = ? and object_class = ?");
+                if (preparedStatement != null) {
+                    preparedStatement.setObject(1, savableAttribute.getVariable());
+                    preparedStatement.setInt(2, node.getId());
+                    preparedStatement.setString(3, savableAttribute.getVariableName());
+                    preparedStatement.setString(4, savableAttribute.getClassName());
 
-                int result = preparedStatement.executeUpdate();
-                preparedStatement.close();
+                    result = preparedStatement.executeUpdate();
+                    preparedStatement.close();
 
-                if (result == 0) { // If record does not exist insert a new one..
-                    node.setId(getNextId("node")); // Gets the next ID for a node that is about to be created
-
-                    preparedStatement = mySQLInstance.getPreparedStatement("insert into node values (default, ?, ?, ?, ?, ?, ?, ? ,?, ?)");
-                    if (preparedStatement != null) {
-                        preparedStatement.setInt(1, node.getProgramId());
-                        preparedStatement.setString(2, node.getContainedText());
-                        if (node instanceof FlowNode) { // Source
-                            preparedStatement.setString(3, ((FlowNode) node).getSource().getSource());
-                        } else {
-                            preparedStatement.setString(3, "");
+                    if (result == 0) { // If record does not exist insert a new one..
+                        //System.out.println(node.getId() + " " + savableAttribute.getVariable() + " does not exist, adding it..");
+                        preparedStatement = mySQLInstance.getPreparedStatement("insert into node_details values (default, ?, ?, ?, ?)");
+                        if (preparedStatement != null) {
+                            preparedStatement.setInt(1, node.getId());
+                            preparedStatement.setString(2, savableAttribute.getVariableName());
+                            preparedStatement.setString(3, savableAttribute.getClassName());
+                            preparedStatement.setObject(4, savableAttribute.getVariable());
+                            preparedStatement.executeUpdate();
+                            preparedStatement.close();
                         }
-                        preparedStatement.setInt(4, node.getId());
-                        preparedStatement.setDouble(5, node.getX());
-                        preparedStatement.setDouble(6, node.getY());
-                        if (node instanceof SplitNode) { // Split choices
-                            List<Split> splits = ((SplitNode) node).getSplits();
-                            preparedStatement.setString(7, splits.get(0).getTarget());
-                            preparedStatement.setString(8, splits.get(1).getTarget());
-                        } else {
-                            preparedStatement.setString(7, "");
-                            preparedStatement.setString(8, "");
-                        }
-
-                        preparedStatement.setString(9, node.getNodeType());
-
-                        preparedStatement.executeUpdate();
-                        preparedStatement.close();
                     }
                 }
             }
@@ -249,22 +243,49 @@ public class DataBank {
                 Integer programId = resultSet.getInt("id");
                 Integer startNode = resultSet.getInt("start_node");
                 Program loadedProgram = new Program(name, programId);
-                ResultSet sourceResultSet = mySQLInstance.runQuery("select id,program_id,source,contained_text,reference_id,source_x,source_y,split_1,split_2,node_type from node where program_id = '" + programId + "';");
+                ResultSet sourceResultSet = mySQLInstance.runQuery("select id,program_id,node_type from node where program_id = '" + programId + "';");
                 FlowController flowController = loadedProgram.getFlowController();
 
                 while (sourceResultSet.next()) {
-                    flowController.createNewNode(
+                    DrawableNode drawableNode = flowController.createNewNode(
                             sourceResultSet.getInt("id"),
                             sourceResultSet.getInt("program_id"),
-                            sourceResultSet.getString("contained_text"),
-                            sourceResultSet.getString("source"),
-                            sourceResultSet.getString("reference_id"),
-                            sourceResultSet.getDouble("source_x"),
-                            sourceResultSet.getDouble("source_y"),
-                            sourceResultSet.getString("split_1"),
-                            sourceResultSet.getString("split_2"),
                             sourceResultSet.getString("node_type"),
-                            true);
+                            true
+                    );
+
+                    PreparedStatement preparedStatement = mySQLInstance.getPreparedStatement("select node_id,object_name,object_class,object_value from node_details where node_id = ?");
+                    preparedStatement.setInt(1, sourceResultSet.getInt("id"));
+                    ResultSet nodeDetailsResultSet = preparedStatement.executeQuery();
+                    while (nodeDetailsResultSet.next()) {
+                        Method method;
+                        try {
+                            if ("java.lang.Double".equals(nodeDetailsResultSet.getString("object_class"))) {
+                                Double doubleValue = nodeDetailsResultSet.getDouble("object_value");
+
+                                method = drawableNode.getClass().getMethod("set" + nodeDetailsResultSet.getString("object_name"), Class.forName(nodeDetailsResultSet.getString("object_class")));
+                                method.invoke(drawableNode, doubleValue);
+                            } else if ("java.lang.String".equals(nodeDetailsResultSet.getString("object_class"))) {
+                                String stringValue = nodeDetailsResultSet.getString("object_value");
+
+                                method = drawableNode.getClass().getMethod("set" + nodeDetailsResultSet.getString("object_name"), Class.forName(nodeDetailsResultSet.getString("object_class")));
+                                method.invoke(drawableNode, stringValue);
+                            } else if ("java.lang.Integer".equals(nodeDetailsResultSet.getString("object_class"))) {
+                                Integer integerValue = nodeDetailsResultSet.getInt("object_value");
+
+                                method = drawableNode.getClass().getMethod("set" + nodeDetailsResultSet.getString("object_name"), Class.forName(nodeDetailsResultSet.getString("object_class")));
+                                method.invoke(drawableNode, integerValue);
+                            }
+                        } catch (NoSuchMethodException e) {
+                            e.printStackTrace();
+                        } catch (InvocationTargetException e) {
+                            e.printStackTrace();
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
 
                 flowController.setStartNode(flowController.getNodeById(startNode));
@@ -274,6 +295,68 @@ public class DataBank {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void loadSplits(SplitNode splitNode) {
+        List<Split> splits = new ArrayList<Split>();
+
+        try {
+            if (mySQLInstance == null) {
+                mySQLInstance = MySQLConnectionManager.getInstance();
+            }
+
+            PreparedStatement preparedStatement = mySQLInstance.getPreparedStatement("select id, target, enabled from split where node_id = ?");
+            preparedStatement.setInt(1, splitNode.getId());
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                splits.add(new Split(resultSet.getInt("id"), splitNode, resultSet.getString("target"), resultSet.getBoolean("enabled")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        splitNode.setSplits(splits);
+    }
+
+    public static void saveSplit(Split split) {
+        try {
+            if (mySQLInstance == null) {
+                mySQLInstance = MySQLConnectionManager.getInstance();
+            }
+
+            PreparedStatement preparedStatement = mySQLInstance.getPreparedStatement("update split set target = ?, enabled = ? where id = ?");
+            if (preparedStatement != null) {
+                preparedStatement.setString(1, split.getTarget());
+                preparedStatement.setBoolean(2, split.isEnabled());
+                preparedStatement.setInt(3, split.getId());
+                int result = preparedStatement.executeUpdate();
+                preparedStatement.close();
+
+                if (result == 0) { // If record does not exist insert a new one..
+                    split.setId(getNextId("split")); // Gets the next ID for a node that is about to be created
+
+                    preparedStatement = mySQLInstance.getPreparedStatement("insert into split values (default, ?, ?, ?)");
+                    if (preparedStatement != null) {
+                        preparedStatement.setInt(1, split.getParent().getId());
+                        preparedStatement.setString(2, split.getTarget());
+                        preparedStatement.setBoolean(3, split.isEnabled());
+                        preparedStatement.executeUpdate();
+                        preparedStatement.close();
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static Split createNewSplit(String target, SplitNode parent, Boolean enabled) {
+        Split split = new Split(getNextId("split"), parent, target, enabled);
+
+        parent.addSplit(split);
+        DataBank.saveSplit(split);
+
+        return split;
     }
 
     private static Integer getNextId(String tableName) {

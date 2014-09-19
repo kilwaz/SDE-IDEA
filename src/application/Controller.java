@@ -441,7 +441,7 @@ public class Controller implements Initializable {
         createOrShowSplitTab(splitNode);
     }
 
-    public HBox createSplitNodeRow(Integer index, Split split, final Integer splitId) {
+    public HBox createSplitNodeRow(Integer index, Split split, Integer splitId) {
         HBox row = new HBox(5);
         Button firstSplitButton = new Button();
         if (split.isEnabled()) {
@@ -450,7 +450,7 @@ public class Controller implements Initializable {
             firstSplitButton.setText("Disabled");
         }
         firstSplitButton.setPrefWidth(80);
-        firstSplitButton.setId("splitButton-" + index + "-" + splitId);
+        firstSplitButton.setId("splitButton-" + split.getId() + "-" + splitId);
         firstSplitButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -458,12 +458,13 @@ public class Controller implements Initializable {
                 Program program = DataBank.currentlyEditProgram;
                 String[] fieldId = button.getId().split("-");
                 SplitNode splitNode = (SplitNode) program.getFlowController().getNodeById(Integer.parseInt(fieldId[2]));
-                splitNode.toggleSplit(Integer.parseInt(fieldId[1]));
 
-                if (splitNode.getSplit(Integer.parseInt(fieldId[1])).isEnabled()) {
+                if ("Disabled".equals(button.getText())) {
                     button.setText("Enabled");
+                    splitNode.updateSplitEnabled(Integer.parseInt(fieldId[1]), true);
                 } else {
                     button.setText("Disabled");
+                    splitNode.updateSplitEnabled(Integer.parseInt(fieldId[1]), false);
                 }
 
                 program.getFlowController().checkConnections(); // Toggling a switch will make or break connections
@@ -473,7 +474,7 @@ public class Controller implements Initializable {
 
         TextField firstSplitField = new TextField();
         firstSplitField.setText(split.getTarget());
-        firstSplitField.setId("splitField-" + index + "-" + splitId);
+        firstSplitField.setId("splitField-" + split.getId() + "-" + splitId);
         firstSplitField.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -482,7 +483,7 @@ public class Controller implements Initializable {
                     Program program = DataBank.currentlyEditProgram;
                     String[] fieldId = textField.getId().split("-");
                     SplitNode splitNode = (SplitNode) program.getFlowController().getNodeById(Integer.parseInt(fieldId[2]));
-                    splitNode.setSplit(Integer.parseInt(fieldId[1]), textField.getText());
+                    splitNode.updateSplitTarget(Integer.parseInt(fieldId[1]), textField.getText());
 
                     program.getFlowController().checkConnections(); // Renaming a node might make or break connections
 
